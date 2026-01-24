@@ -475,6 +475,35 @@
                 SAVE SETTINGS
             </button>
             
+            <!-- GPS Status Info -->
+            <div style="margin-top: 30px; padding: 20px; background: #f0fdf4; border-radius: 10px; border-left: 4px solid #10b981;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
+                    📡 GPS Status
+                </h3>
+                <div style="font-size: 13px; line-height: 1.6; color: #666;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="font-weight: 600; color: #333;">Status:</div>
+                        <div id="gpsStatusText" style="color: #666;">Checking...</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Satellites:</div>
+                        <div id="gpsSatellites" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Accuracy (HDOP):</div>
+                        <div id="gpsAccuracy" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Fix Quality:</div>
+                        <div id="gpsFixQuality" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Last Update:</div>
+                        <div id="gpsLastUpdate" style="color: #666;">--</div>
+                    </div>
+                    
+                    <div style="font-size: 11px; color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                        <strong>HDOP Guide:</strong> &lt;1 = Excellent, 1-2 = Good, 2-5 = Moderate, 5-10 = Fair, &gt;10 = Poor
+                    </div>
+                </div>
+            </div>
+            
             <!-- LED Status Reference -->
             <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea;">
                 <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
@@ -520,6 +549,15 @@
         const CHAR_SERVO_POSITION = '5a1b6d4e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
         const CHAR_SYSTEM_STATUS = '6b2c7e5f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
         
+        // Fish Hawk data characteristics
+        const CHAR_FH_SURFACE_SPEED = '7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d';
+        const CHAR_FH_SURFACE_TEMP = '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e';
+        const CHAR_FH_PROBE_TEMP = '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f';
+        const CHAR_FH_PROBE_DEPTH = '0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';
+        const CHAR_FH_SPEED_UNITS = '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
+        const CHAR_FH_TEMP_UNITS = '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';
+        const CHAR_FH_DEPTH_UNITS = '3a7b8c9d-0e1f-2a3b-4c5d-6e7f8a9b0c1d';
+        
         let device;
         let server;
         let controlService;
@@ -533,6 +571,15 @@
         let charFishHawkSpeed;
         let charServoPosition;
         let charSystemStatus;
+        
+        // Fish Hawk data characteristics
+        let charFhSurfaceSpeed;
+        let charFhSurfaceTemp;
+        let charFhProbeTemp;
+        let charFhProbeDepth;
+        let charFhSpeedUnits;
+        let charFhTempUnits;
+        let charFhDepthUnits;
         
         let systemEnabled = false;
         let currentSource = 0;
@@ -585,6 +632,33 @@
                 charFishHawkSpeed.addEventListener('characteristicvaluechanged', handleFishHawkSpeedChange);
                 charServoPosition.addEventListener('characteristicvaluechanged', handleServoPositionChange);
                 charSystemStatus.addEventListener('characteristicvaluechanged', handleSystemStatusChange);
+                
+                // Get Fish Hawk data characteristics
+                console.log('Getting Fish Hawk data characteristics...');
+                charFhSurfaceSpeed = await statusService.getCharacteristic(CHAR_FH_SURFACE_SPEED);
+                charFhSurfaceTemp = await statusService.getCharacteristic(CHAR_FH_SURFACE_TEMP);
+                charFhProbeTemp = await statusService.getCharacteristic(CHAR_FH_PROBE_TEMP);
+                charFhProbeDepth = await statusService.getCharacteristic(CHAR_FH_PROBE_DEPTH);
+                charFhSpeedUnits = await statusService.getCharacteristic(CHAR_FH_SPEED_UNITS);
+                charFhTempUnits = await statusService.getCharacteristic(CHAR_FH_TEMP_UNITS);
+                charFhDepthUnits = await statusService.getCharacteristic(CHAR_FH_DEPTH_UNITS);
+                
+                console.log('Starting Fish Hawk notifications...');
+                await charFhSurfaceSpeed.startNotifications();
+                await charFhSurfaceTemp.startNotifications();
+                await charFhProbeTemp.startNotifications();
+                await charFhProbeDepth.startNotifications();
+                await charFhSpeedUnits.startNotifications();
+                await charFhTempUnits.startNotifications();
+                await charFhDepthUnits.startNotifications();
+                
+                charFhSurfaceSpeed.addEventListener('characteristicvaluechanged', handleFhSurfaceSpeed);
+                charFhSurfaceTemp.addEventListener('characteristicvaluechanged', handleFhSurfaceTemp);
+                charFhProbeTemp.addEventListener('characteristicvaluechanged', handleFhProbeTemp);
+                charFhProbeDepth.addEventListener('characteristicvaluechanged', handleFhProbeDepth);
+                charFhSpeedUnits.addEventListener('characteristicvaluechanged', handleFhSpeedUnits);
+                charFhTempUnits.addEventListener('characteristicvaluechanged', handleFhTempUnits);
+                charFhDepthUnits.addEventListener('characteristicvaluechanged', handleFhDepthUnits);
                 
                 device.addEventListener('gattserverdisconnected', onDisconnected);
                 
@@ -658,6 +732,52 @@
             // Update source indicators
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('fishHawkIndicator').className = 'indicator ' + (fishHawkValid ? 'active' : 'inactive');
+        }
+        
+        // Fish Hawk data handlers
+        function handleFhSurfaceSpeed(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('surfaceSpeed').textContent = value;
+        }
+        
+        function handleFhSurfaceTemp(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('surfaceTemp').textContent = value;
+        }
+        
+        function handleFhProbeTemp(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('probeTemp').textContent = value;
+        }
+        
+        function handleFhProbeDepth(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('probeDepth').textContent = value;
+        }
+        
+        function handleFhSpeedUnits(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('speedUnits').textContent = value;
+            document.getElementById('speedUnits2').textContent = value;
+        }
+        
+        function handleFhTempUnits(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            document.getElementById('tempUnits').textContent = '°' + value;
+            document.getElementById('tempUnits2').textContent = '°' + value;
+        }
+        
+        function handleFhDepthUnits(event) {
+            const decoder = new TextDecoder();
+            const value = decoder.decode(event.target.value);
+            const unit = value === 'F' ? 'ft' : 'm';
+            document.getElementById('depthUnits').textContent = unit;
         }
         
         async function toggleSystem() {
@@ -741,7 +861,87 @@
         
         function openSettings() {
             document.getElementById('settingsPanel').classList.add('active');
+            updateGPSStatus(); // Update GPS info when opening settings
             // TODO: Load current settings from ESP32
+        }
+        
+        function updateGPSStatus() {
+            // This will be updated via WiFi API polling or BLE characteristics
+            // For now, we'll use WiFi API endpoint
+            fetch('/api/gps')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status text with color
+                    const statusEl = document.getElementById('gpsStatusText');
+                    if (data.searching) {
+                        statusEl.innerHTML = '<span style="color: #f59e0b;">🔍 Searching for satellites...</span>';
+                    } else if (data.valid) {
+                        statusEl.innerHTML = '<span style="color: #10b981;">✅ GPS Locked</span>';
+                    } else {
+                        statusEl.innerHTML = '<span style="color: #6b7280;">⏸️ No GPS Data</span>';
+                    }
+                    
+                    // Update satellite count
+                    document.getElementById('gpsSatellites').textContent = data.satellites > 0 ? data.satellites : '--';
+                    
+                    // Update HDOP (accuracy)
+                    if (data.hdop > 0) {
+                        let hdopText = data.hdop.toFixed(1);
+                        let hdopColor = '#666';
+                        let hdopLabel = '';
+                        
+                        if (data.hdop < 1) {
+                            hdopColor = '#10b981'; // Green
+                            hdopLabel = ' (Excellent)';
+                        } else if (data.hdop < 2) {
+                            hdopColor = '#10b981'; // Green
+                            hdopLabel = ' (Good)';
+                        } else if (data.hdop < 5) {
+                            hdopColor = '#f59e0b'; // Yellow
+                            hdopLabel = ' (Moderate)';
+                        } else if (data.hdop < 10) {
+                            hdopColor = '#f97316'; // Orange
+                            hdopLabel = ' (Fair)';
+                        } else {
+                            hdopColor = '#dc2626'; // Red
+                            hdopLabel = ' (Poor)';
+                        }
+                        
+                        document.getElementById('gpsAccuracy').innerHTML = 
+                            `<span style="color: ${hdopColor}; font-weight: 600;">${hdopText}${hdopLabel}</span>`;
+                    } else {
+                        document.getElementById('gpsAccuracy').textContent = '--';
+                    }
+                    
+                    // Update fix quality
+                    const fixEl = document.getElementById('gpsFixQuality');
+                    if (data.fixQuality === 3) {
+                        fixEl.innerHTML = '<span style="color: #10b981;">3D Fix</span>';
+                    } else if (data.fixQuality === 2) {
+                        fixEl.innerHTML = '<span style="color: #f59e0b;">2D Fix</span>';
+                    } else {
+                        fixEl.innerHTML = '<span style="color: #6b7280;">No Fix</span>';
+                    }
+                    
+                    // Update last update time
+                    if (data.age >= 0) {
+                        const seconds = Math.floor(data.age / 1000);
+                        if (seconds < 2) {
+                            document.getElementById('gpsLastUpdate').innerHTML = '<span style="color: #10b981;">Just now</span>';
+                        } else if (seconds < 10) {
+                            document.getElementById('gpsLastUpdate').textContent = seconds + ' seconds ago';
+                        } else {
+                            document.getElementById('gpsLastUpdate').innerHTML = '<span style="color: #f59e0b;">' + seconds + ' seconds ago</span>';
+                        }
+                    } else {
+                        document.getElementById('gpsLastUpdate').textContent = '--';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching GPS status:', error);
+                    // Show offline status
+                    document.getElementById('gpsStatusText').innerHTML = '<span style="color: #6b7280;">Offline</span>';
+                });
         }
         
         function closeSettings() {
@@ -778,13 +978,39 @@
             closeSettings();
         }
         
-        // Check Web Bluetooth support
+        // Check connection mode and Web Bluetooth support
         window.addEventListener('load', function() {
             console.log('Page loaded');
             console.log('Protocol:', window.location.protocol);
+            console.log('Hostname:', window.location.hostname);
             console.log('navigator.bluetooth exists:', !!navigator.bluetooth);
             
-            // Check if HTTPS (required for Web Bluetooth)
+            // Detect if we're in WiFi mode (connected to ESP32 directly)
+            const isWiFiMode = window.location.hostname === '192.168.4.1' || 
+                              window.location.hostname === 'localhost' ||
+                              window.location.hostname.startsWith('192.168.');
+            
+            if (isWiFiMode) {
+                // WiFi mode - disable BLE connect button and show WiFi message
+                console.log('WiFi mode detected - BLE connection not available');
+                document.getElementById('connectBtn').style.display = 'none';
+                
+                // Show WiFi mode message
+                const connectSection = document.querySelector('.connect-section');
+                connectSection.innerHTML = `
+                    <h2 style="color: #10b981; margin-bottom: 15px;">✅ WiFi Mode Active</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        You're connected to the ESP32 via WiFi.<br>
+                        All controls below are active via WiFi API.
+                    </p>
+                    <button class="connect-btn" onclick="showControlInterface()" style="background: #10b981;">
+                        Continue to Controls
+                    </button>
+                `;
+                return;
+            }
+            
+            // BLE mode - check for HTTPS and Web Bluetooth support
             if (window.location.protocol !== 'https:' && window.location.protocol !== 'file:') {
                 showError('Web Bluetooth requires HTTPS. Current protocol: ' + window.location.protocol);
                 document.getElementById('connectBtn').disabled = true;
@@ -793,7 +1019,7 @@
             
             // Check Web Bluetooth support
             if (!navigator.bluetooth) {
-                showError('Web Bluetooth not available. iOS: ' + /iPad|iPhone|iPod/.test(navigator.userAgent) + ', Safari: ' + /Safari/.test(navigator.userAgent));
+                showError('Web Bluetooth not available. Use Bluefy browser on iOS or Chrome on Android.');
                 document.getElementById('connectBtn').disabled = true;
             }
         });
