@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kicker Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        .connect-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .connect-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #667eea;
+            color: white;
+        }
+        
+        .connect-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .speed-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .speed-value {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            line-height: 1;
+        }
+        
+        .speed-label {
+            font-size: 18px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .speed-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .speed-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .speed-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .speed-input {
+            width: 120px;
+            height: 60px;
+            font-size: 32px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .source-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .source-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .source-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .control-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .start-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .stop-btn {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .indicator.active {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+        
+        .indicator.inactive {
+            background: #ef4444;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+        
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Connection Card -->
+        <div class="card" id="connectCard">
+            <h1>Kicker Control</h1>
+            <div class="subtitle">Web Bluetooth Speed Control</div>
+            <div class="connect-section">
+                <button class="connect-btn" id="connectBtn" onclick="connectToDevice()">
+                    Connect to Kicker Control
+                </button>
+                <div class="error-message hidden" id="errorMessage"></div>
+            </div>
+        </div>
+        
+        <!-- Main Control Card -->
+        <div class="card hidden" id="controlCard">
+            <h1>Kicker Control</h1>
+            <div class="subtitle">
+                <span class="indicator" id="systemIndicator"></span>
+                <span id="systemStatus">Standby</span>
+            </div>
+            
+            <!-- Current Speed Display -->
+            <div class="speed-display">
+                <div class="speed-value" id="currentSpeed">0.0</div>
+                <div class="speed-label">MPH</div>
+            </div>
+            
+            <!-- Speed Source Selector -->
+            <div class="source-selector">
+                <button class="source-btn active" id="gpsBtn" onclick="setSpeedSource(0)">
+                    <span class="indicator" id="gpsIndicator"></span>GPS
+                </button>
+                <button class="source-btn" id="fishHawkBtn" onclick="setSpeedSource(1)">
+                    <span class="indicator" id="fishHawkIndicator"></span>Water Speed
+                </button>
+            </div>
+            
+            <!-- Target Speed Controls -->
+            <div class="speed-controls">
+                <button class="speed-btn" onclick="adjustSpeed(-0.1)">−</button>
+                <input type="number" class="speed-input" id="targetSpeed" 
+                       value="2.5" min="0.5" max="10.0" step="0.1"
+                       onchange="setTargetSpeed()">
+                <button class="speed-btn" onclick="adjustSpeed(0.1)">+</button>
+            </div>
+            
+            <!-- Control Buttons -->
+            <button class="control-btn start-btn" id="startBtn" onclick="toggleSystem()">
+                START
+            </button>
+        </div>
+        
+        <!-- Status Card -->
+        <div class="card hidden" id="statusCard">
+            <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-value" id="gpsSpeed">0.0</div>
+                    <div class="status-label">GPS Speed</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="fishSpeed">0.0</div>
+                    <div class="status-label">Water Speed</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="servoPos">0</div>
+                    <div class="status-label">Servo Position</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="servoPercent">0%</div>
+                    <div class="status-label">Throttle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // BLE Service and Characteristic UUIDs
+        const SERVICE_CONTROL = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const SERVICE_STATUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        
+        const CHAR_TARGET_SPEED = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+        const CHAR_SYSTEM_ENABLE = '1c95d5e3-d8f7-413a-bf3d-7a2e5d7be87e';
+        const CHAR_SPEED_SOURCE = '9a8ca5e4-1f3b-4d5e-8b2f-6c3d4e5f6a7b';
+        const CHAR_CURRENT_SPEED = '2d8f3a1b-4c5e-6d7f-8a9b-0c1d2e3f4a5b';
+        const CHAR_GPS_SPEED = '3e9f4b2c-5d6f-7e8a-9b0c-1d2e3f4a5b6c';
+        const CHAR_FISHHAWK_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
+        const CHAR_SERVO_POSITION = '5a1b6d4e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
+        const CHAR_SYSTEM_STATUS = '6b2c7e5f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
+        
+        let device;
+        let server;
+        let controlService;
+        let statusService;
+        
+        let charTargetSpeed;
+        let charSystemEnable;
+        let charSpeedSource;
+        let charCurrentSpeed;
+        let charGpsSpeed;
+        let charFishHawkSpeed;
+        let charServoPosition;
+        let charSystemStatus;
+        
+        let systemEnabled = false;
+        let currentSource = 0;
+        
+        async function connectToDevice() {
+            try {
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('errorMessage').classList.add('hidden');
+                
+                console.log('Requesting Bluetooth Device...');
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'Kicker Control' }],
+                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS]
+                });
+                
+                console.log('Connecting to GATT Server...');
+                server = await device.connectGATTServer();
+                
+                console.log('Getting Services...');
+                controlService = await server.getPrimaryService(SERVICE_CONTROL);
+                statusService = await server.getPrimaryService(SERVICE_STATUS);
+                
+                console.log('Getting Characteristics...');
+                charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
+                charSystemEnable = await controlService.getCharacteristic(CHAR_SYSTEM_ENABLE);
+                charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
+                charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
+                charGpsSpeed = await statusService.getCharacteristic(CHAR_GPS_SPEED);
+                charFishHawkSpeed = await statusService.getCharacteristic(CHAR_FISHHAWK_SPEED);
+                charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
+                charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
+                
+                console.log('Starting Notifications...');
+                await charCurrentSpeed.startNotifications();
+                await charGpsSpeed.startNotifications();
+                await charFishHawkSpeed.startNotifications();
+                await charServoPosition.startNotifications();
+                await charSystemStatus.startNotifications();
+                
+                charCurrentSpeed.addEventListener('characteristicvaluechanged', handleCurrentSpeedChange);
+                charGpsSpeed.addEventListener('characteristicvaluechanged', handleGpsSpeedChange);
+                charFishHawkSpeed.addEventListener('characteristicvaluechanged', handleFishHawkSpeedChange);
+                charServoPosition.addEventListener('characteristicvaluechanged', handleServoPositionChange);
+                charSystemStatus.addEventListener('characteristicvaluechanged', handleSystemStatusChange);
+                
+                device.addEventListener('gattserverdisconnected', onDisconnected);
+                
+                // Read initial values
+                const targetSpeedValue = await charTargetSpeed.readValue();
+                const targetSpeed = targetSpeedValue.getFloat32(0, true);
+                document.getElementById('targetSpeed').value = targetSpeed.toFixed(1);
+                
+                console.log('Connected successfully!');
+                showControlInterface();
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                showError('Failed to connect: ' + error.message);
+                document.getElementById('connectBtn').disabled = false;
+            }
+        }
+        
+        function handleCurrentSpeedChange(event) {
+            const value = event.target.value.getFloat32(0, true);
+            document.getElementById('currentSpeed').textContent = value.toFixed(1);
+        }
+        
+        function handleGpsSpeedChange(event) {
+            const value = event.target.value.getFloat32(0, true);
+            document.getElementById('gpsSpeed').textContent = value.toFixed(1);
+        }
+        
+        function handleFishHawkSpeedChange(event) {
+            const value = event.target.value.getFloat32(0, true);
+            document.getElementById('fishSpeed').textContent = value.toFixed(1);
+        }
+        
+        function handleServoPositionChange(event) {
+            const value = event.target.value.getUint16(0, true);
+            document.getElementById('servoPos').textContent = value;
+            
+            // Calculate throttle percentage
+            const minPos = 1000;
+            const maxPos = 2000;
+            const percent = Math.round(((value - minPos) / (maxPos - minPos)) * 100);
+            document.getElementById('servoPercent').textContent = percent + '%';
+        }
+        
+        function handleSystemStatusChange(event) {
+            const status = event.target.value.getUint8(0);
+            const enabled = (status & 0x01) !== 0;
+            const gpsValid = (status & 0x02) !== 0;
+            const fishHawkValid = (status & 0x04) !== 0;
+            
+            // Update system indicator
+            const sysInd = document.getElementById('systemIndicator');
+            const sysStatus = document.getElementById('systemStatus');
+            sysInd.className = 'indicator ' + (enabled ? 'active' : 'inactive');
+            sysStatus.textContent = enabled ? 'Running' : 'Standby';
+            
+            // Update button
+            const btn = document.getElementById('startBtn');
+            btn.textContent = enabled ? 'STOP' : 'START';
+            btn.className = 'control-btn ' + (enabled ? 'stop-btn' : 'start-btn');
+            systemEnabled = enabled;
+            
+            // Update source indicators
+            document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
+            document.getElementById('fishHawkIndicator').className = 'indicator ' + (fishHawkValid ? 'active' : 'inactive');
+        }
+        
+        async function toggleSystem() {
+            if (!charSystemEnable) return;
+            
+            try {
+                systemEnabled = !systemEnabled;
+                const buffer = new Uint8Array([systemEnabled ? 1 : 0]);
+                await charSystemEnable.writeValue(buffer);
+            } catch (error) {
+                console.error('Error toggling system:', error);
+                showError('Failed to toggle system');
+            }
+        }
+        
+        async function adjustSpeed(delta) {
+            const input = document.getElementById('targetSpeed');
+            let newSpeed = parseFloat(input.value) + delta;
+            newSpeed = Math.max(0.5, Math.min(10.0, newSpeed));
+            input.value = newSpeed.toFixed(1);
+            await setTargetSpeed();
+        }
+        
+        async function setTargetSpeed() {
+            if (!charTargetSpeed) return;
+            
+            try {
+                const speed = parseFloat(document.getElementById('targetSpeed').value);
+                const buffer = new Float32Array([speed]);
+                await charTargetSpeed.writeValue(buffer);
+            } catch (error) {
+                console.error('Error setting target speed:', error);
+            }
+        }
+        
+        async function setSpeedSource(source) {
+            if (!charSpeedSource) return;
+            
+            try {
+                currentSource = source;
+                const buffer = new Uint8Array([source]);
+                await charSpeedSource.writeValue(buffer);
+                
+                // Update UI
+                if (source === 0) {
+                    document.getElementById('gpsBtn').classList.add('active');
+                    document.getElementById('fishHawkBtn').classList.remove('active');
+                } else {
+                    document.getElementById('gpsBtn').classList.remove('active');
+                    document.getElementById('fishHawkBtn').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error setting speed source:', error);
+            }
+        }
+        
+        function onDisconnected() {
+            console.log('Device disconnected');
+            showError('Disconnected from Kicker Control');
+            
+            // Reset UI
+            document.getElementById('connectCard').classList.remove('hidden');
+            document.getElementById('controlCard').classList.add('hidden');
+            document.getElementById('statusCard').classList.add('hidden');
+            document.getElementById('connectBtn').disabled = false;
+        }
+        
+        function showControlInterface() {
+            document.getElementById('connectCard').classList.add('hidden');
+            document.getElementById('controlCard').classList.remove('hidden');
+            document.getElementById('statusCard').classList.remove('hidden');
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+        
+        // Check Web Bluetooth support
+        window.addEventListener('load', function() {
+            console.log('Page loaded');
+            console.log('Protocol:', window.location.protocol);
+            console.log('navigator.bluetooth exists:', !!navigator.bluetooth);
+            
+            // Check if HTTPS (required for Web Bluetooth)
+            if (window.location.protocol !== 'https:' && window.location.protocol !== 'file:') {
+                showError('Web Bluetooth requires HTTPS. Current protocol: ' + window.location.protocol);
+                document.getElementById('connectBtn').disabled = true;
+                return;
+            }
+            
+            // Check Web Bluetooth support
+            if (!navigator.bluetooth) {
+                showError('Web Bluetooth not available. iOS: ' + /iPad|iPhone|iPod/.test(navigator.userAgent) + ', Safari: ' + /Safari/.test(navigator.userAgent));
+                document.getElementById('connectBtn').disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
