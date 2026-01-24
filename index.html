@@ -385,23 +385,23 @@
             <div class="status-grid">
                 <div class="status-item">
                     <div class="status-value" id="surfaceSpeed">--</div>
-                    <div class="status-label">Surface Speed</div>
+                    <div class="status-label">Surface Speed (<span id="speedUnits">MPH</span>)</div>
                 </div>
                 <div class="status-item">
                     <div class="status-value" id="surfaceTemp">--</div>
-                    <div class="status-label">Surface Temp</div>
+                    <div class="status-label">Surface Temp (<span id="tempUnits">°F</span>)</div>
                 </div>
                 <div class="status-item">
                     <div class="status-value" id="probeSpeed">--</div>
-                    <div class="status-label">Probe Speed</div>
+                    <div class="status-label">Probe Speed (<span id="speedUnits2">MPH</span>)</div>
                 </div>
                 <div class="status-item">
                     <div class="status-value" id="probeTemp">--</div>
-                    <div class="status-label">Probe Temp</div>
+                    <div class="status-label">Probe Temp (<span id="tempUnits2">°F</span>)</div>
                 </div>
                 <div class="status-item" style="grid-column: 1 / -1;">
                     <div class="status-value" id="probeDepth">---</div>
-                    <div class="status-label">Probe Depth</div>
+                    <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
                 </div>
             </div>
         </div>
@@ -481,10 +481,6 @@
                     RGB LED Status Indicator
                 </h3>
                 <div style="font-size: 13px; line-height: 1.8; color: #666;">
-                    <p style="margin-bottom: 10px;">
-                        <strong>Hardware:</strong> Connect RGB LED (common cathode) to GPIO2 (Red), GPIO4 (Green), GPIO15 (Blue). Use 220Ω resistors on each color.
-                    </p>
-                    
                     <p style="font-weight: 600; color: #333; margin-bottom: 8px;">LED Status Colors:</p>
                     
                     <div style="margin-left: 10px;">
