@@ -222,6 +222,83 @@
             margin-top: 15px;
             text-align: center;
         }
+        
+        /* Settings Panel */
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .settings-panel.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        
+        .settings-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 600px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f3f4f6;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        
+        .setting-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .setting-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -275,6 +352,9 @@
             <button class="control-btn start-btn" id="startBtn" onclick="toggleSystem()">
                 START
             </button>
+            <button class="control-btn" style="background: #6b7280; color: white; margin-top: 10px;" onclick="openSettings()">
+                SETTINGS
+            </button>
         </div>
         
         <!-- Status Card -->
@@ -282,11 +362,11 @@
             <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Status</h2>
             <div class="status-grid">
                 <div class="status-item">
-                    <div class="status-value" id="gpsSpeed">0.0</div>
+                    <div class="status-value" id="gpsSpeed">N/A</div>
                     <div class="status-label">GPS Speed</div>
                 </div>
                 <div class="status-item">
-                    <div class="status-value" id="fishSpeed">0.0</div>
+                    <div class="status-value" id="fishSpeed">N/A</div>
                     <div class="status-label">Water Speed</div>
                 </div>
                 <div class="status-item">
@@ -296,6 +376,109 @@
                 <div class="status-item">
                     <div class="status-value" id="servoPercent">0%</div>
                     <div class="status-label">Throttle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-btn" onclick="closeSettings()">×</button>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Servo Idle Position (µs)</label>
+                <input type="number" class="setting-input" id="servoIdle" 
+                       min="1000" max="2000" value="1000">
+                <div class="setting-description">Servo position for idle throttle (1000-2000)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Servo Max Position (µs)</label>
+                <input type="number" class="setting-input" id="servoMax" 
+                       min="1000" max="2000" value="2000">
+                <div class="setting-description">Servo position for full throttle (1000-2000)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Servo Safe Position (µs)</label>
+                <input type="number" class="setting-input" id="servoSafe" 
+                       min="1000" max="2000" value="1250">
+                <div class="setting-description">Fallback position on signal loss (recommended: 25% throttle)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Default Target Speed (mph)</label>
+                <input type="number" class="setting-input" id="defaultSpeed" 
+                       min="0.5" max="10.0" step="0.1" value="2.5">
+                <div class="setting-description">Speed to use on startup</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Speed Smoothing (seconds)</label>
+                <input type="number" class="setting-input" id="smoothing" 
+                       min="5" max="120" value="10">
+                <div class="setting-description">Averaging window for speed feedback (5-120 sec)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">PID Proportional (Kp)</label>
+                <input type="number" class="setting-input" id="pidKp" 
+                       min="0" max="10" step="0.01" value="0.50">
+                <div class="setting-description">Proportional gain (default: 0.50)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">PID Integral (Ki)</label>
+                <input type="number" class="setting-input" id="pidKi" 
+                       min="0" max="10" step="0.01" value="0.10">
+                <div class="setting-description">Integral gain (default: 0.10)</div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">PID Derivative (Kd)</label>
+                <input type="number" class="setting-input" id="pidKd" 
+                       min="0" max="10" step="0.01" value="0.05">
+                <div class="setting-description">Derivative gain (default: 0.05)</div>
+            </div>
+            
+            <button class="control-btn start-btn" onclick="saveSettings()" style="margin-top: 20px;">
+                SAVE SETTINGS
+            </button>
+            
+            <!-- LED Status Reference -->
+            <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
+                    RGB LED Status Indicator
+                </h3>
+                <div style="font-size: 13px; line-height: 1.8; color: #666;">
+                    <p style="margin-bottom: 10px;">
+                        <strong>Hardware:</strong> Connect RGB LED (common cathode) to GPIO2 (Red), GPIO4 (Green), GPIO15 (Blue). Use 220Ω resistors on each color.
+                    </p>
+                    
+                    <p style="font-weight: 600; color: #333; margin-bottom: 8px;">LED Status Colors:</p>
+                    
+                    <div style="margin-left: 10px;">
+                        <p><span style="color: #dc2626;">🔴 Red Blink</span> - ERROR! No speed input (GPS or Water Speed)</p>
+                        <p><span style="color: #7c3aed;">🟣 Purple</span> - System actively controlling motor</p>
+                        <p><span style="color: #10b981;">🟢 Green</span> - GPS ready, system in standby</p>
+                        <p><span style="color: #f59e0b;">🟡 Yellow Blink</span> - Searching for GPS signal</p>
+                        <p><span style="color: #f97316;">🟠 Orange Pulse</span> - Phone/tablet connected via BLE</p>
+                        <p><span style="color: #3b82f6;">🔵 Blue</span> - Water Speed only (no GPS)</p>
+                        <p><span style="color: #06b6d4;">🩵 Cyan</span> - Both GPS and Water Speed valid</p>
+                        <p><span style="color: #9ca3af;">⚪ White Blink</span> - System booting/initializing</p>
+                    </div>
+                    
+                    <p style="margin-top: 12px; font-size: 12px; font-style: italic;">
+                        <strong>Priority:</strong> Error states override all others. System state overrides data source indicators.
+                    </p>
+                    
+                    <p style="margin-top: 8px; font-size: 12px;">
+                        See <strong>RGB_LED_Status_Plan.md</strong> for complete technical details and troubleshooting.
+                    </p>
                 </div>
             </div>
         </div>
@@ -331,6 +514,14 @@
         
         let systemEnabled = false;
         let currentSource = 0;
+        
+        // State tracking
+        let state = {
+            gpsValid: false,
+            fishHawkValid: false,
+            gpsSpeed: 0,
+            fishHawkSpeed: 0
+        };
         
         async function connectToDevice() {
             try {
@@ -395,12 +586,14 @@
         
         function handleGpsSpeedChange(event) {
             const value = event.target.value.getFloat32(0, true);
-            document.getElementById('gpsSpeed').textContent = value.toFixed(1);
+            state.gpsSpeed = value;
+            document.getElementById('gpsSpeed').textContent = state.gpsValid ? value.toFixed(1) : 'N/A';
         }
         
         function handleFishHawkSpeedChange(event) {
             const value = event.target.value.getFloat32(0, true);
-            document.getElementById('fishSpeed').textContent = value.toFixed(1);
+            state.fishHawkSpeed = value;
+            document.getElementById('fishSpeed').textContent = state.fishHawkValid ? value.toFixed(1) : 'N/A';
         }
         
         function handleServoPositionChange(event) {
@@ -419,6 +612,14 @@
             const enabled = (status & 0x01) !== 0;
             const gpsValid = (status & 0x02) !== 0;
             const fishHawkValid = (status & 0x04) !== 0;
+            
+            // Update state
+            state.gpsValid = gpsValid;
+            state.fishHawkValid = fishHawkValid;
+            
+            // Update displays to show N/A if invalid
+            document.getElementById('gpsSpeed').textContent = gpsValid ? state.gpsSpeed.toFixed(1) : 'N/A';
+            document.getElementById('fishSpeed').textContent = fishHawkValid ? state.fishHawkSpeed.toFixed(1) : 'N/A';
             
             // Update system indicator
             const sysInd = document.getElementById('systemIndicator');
@@ -512,6 +713,36 @@
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
             errorEl.classList.remove('hidden');
+        }
+        
+        function openSettings() {
+            document.getElementById('settingsPanel').classList.add('active');
+            // TODO: Load current settings from ESP32
+        }
+        
+        function closeSettings() {
+            document.getElementById('settingsPanel').classList.remove('active');
+        }
+        
+        async function saveSettings() {
+            // Get all settings values
+            const settings = {
+                servoIdle: parseInt(document.getElementById('servoIdle').value),
+                servoMax: parseInt(document.getElementById('servoMax').value),
+                servoSafe: parseInt(document.getElementById('servoSafe').value),
+                defaultSpeed: parseFloat(document.getElementById('defaultSpeed').value),
+                smoothing: parseInt(document.getElementById('smoothing').value),
+                Kp: parseFloat(document.getElementById('pidKp').value),
+                Ki: parseFloat(document.getElementById('pidKi').value),
+                Kd: parseFloat(document.getElementById('pidKd').value)
+            };
+            
+            // TODO: Send settings to ESP32 via BLE characteristics
+            // For now, just show confirmation
+            alert('Settings saved!\n\nNote: Settings will be sent to ESP32 when firmware supports settings characteristics.');
+            console.log('Settings to save:', settings);
+            
+            closeSettings();
         }
         
         // Check Web Bluetooth support
