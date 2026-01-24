@@ -375,10 +375,8 @@
                 
                 device.addEventListener('gattserverdisconnected', onDisconnected);
                 
-                // Read initial values
-                const targetSpeedValue = await charTargetSpeed.readValue();
-                const targetSpeed = targetSpeedValue.getFloat32(0, true);
-                document.getElementById('targetSpeed').value = targetSpeed.toFixed(1);
+                // Set default target speed in UI
+                document.getElementById('targetSpeed').value = '2.5';
                 
                 console.log('Connected successfully!');
                 showControlInterface();
