@@ -344,7 +344,7 @@
                 });
                 
                 console.log('Connecting to GATT Server...');
-                server = await device.connectGATTServer();
+                server = await device.gatt.connect();
                 
                 console.log('Getting Services...');
                 controlService = await server.getPrimaryService(SERVICE_CONTROL);
