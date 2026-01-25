@@ -402,7 +402,7 @@
                     <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
                 </div>
                 <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
-                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px;">Probe - Not Connected</div>
+                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px; color: #ef4444;">Probe - Not Connected</div>
                 </div>
             </div>
         </div>
@@ -718,14 +718,19 @@
         function handleFishHawkSpeedChange(event) {
             const value = event.target.value.getFloat32(0, true);
             state.fishHawkSpeed = value;
-            state.fishHawkValid = true;
             
-            // Only update timestamp if we got actual valid data
-            if (value > 0) {
+            // Only update timestamp if firmware says valid AND we have actual data
+            // (state.fishHawkValid is set by handleSystemStatusChange)
+            if (state.fishHawkValid && value > 0.01) {
                 lastFishHawkUpdate = Date.now();
             }
             
-            document.getElementById('probeSpeed').textContent = value.toFixed(1);
+            // Show formatted speed or dashes
+            if (state.fishHawkValid && value >= 0) {
+                document.getElementById('probeSpeed').textContent = value.toFixed(1);
+            } else {
+                document.getElementById('probeSpeed').textContent = '--';
+            }
         }
         
         function handleServoPositionChange(event) {
@@ -764,41 +769,51 @@
         function handleFhSurfaceSpeed(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
-            document.getElementById('surfaceSpeed').textContent = value;
             
-            // Only update timestamp if valid data (not dashes)
-            if (!value.includes('-')) {
+            // Check if valid data (not dashes)
+            if (!value.includes('-') && parseFloat(value) >= 0) {
+                // Format with one decimal place
+                const numValue = parseFloat(value);
+                document.getElementById('surfaceSpeed').textContent = numValue.toFixed(1);
                 lastFishHawkUpdate = Date.now();
+            } else {
+                document.getElementById('surfaceSpeed').textContent = '--';
             }
         }
         
         function handleFhSurfaceTemp(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
-            document.getElementById('surfaceTemp').textContent = value;
             
             if (!value.includes('-')) {
+                document.getElementById('surfaceTemp').textContent = value;
                 lastFishHawkUpdate = Date.now();
+            } else {
+                document.getElementById('surfaceTemp').textContent = '--';
             }
         }
         
         function handleFhProbeTemp(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
-            document.getElementById('probeTemp').textContent = value;
             
             if (!value.includes('-')) {
+                document.getElementById('probeTemp').textContent = value;
                 lastFishHawkUpdate = Date.now();
+            } else {
+                document.getElementById('probeTemp').textContent = '--';
             }
         }
         
         function handleFhProbeDepth(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
-            document.getElementById('probeDepth').textContent = value;
             
             if (!value.includes('-')) {
+                document.getElementById('probeDepth').textContent = value;
                 lastFishHawkUpdate = Date.now();
+            } else {
+                document.getElementById('probeDepth').textContent = '---';
             }
         }
         
