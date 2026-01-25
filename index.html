@@ -104,6 +104,9 @@
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .speed-btn:active {
@@ -358,41 +361,24 @@
                 <button class="speed-btn" onclick="adjustSpeed(0.1)">+</button>
             </div>
             
-            <!-- Control Buttons -->
-            <button class="control-btn start-btn" id="startBtn" onclick="toggleSystem()">
-                START
-            </button>
-            <button class="control-btn" style="background: #6b7280; color: white; margin-top: 10px;" onclick="openSettings()">
+            <!-- Settings Button -->
+            <button class="control-btn" style="background: #6b7280; color: white; margin-top: 20px;" onclick="openSettings()">
                 SETTINGS
             </button>
         </div>
         
-        <!-- Status Card -->
+        <!-- Combined Data Card -->
         <div class="card hidden" id="statusCard">
-            <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Status</h2>
+            <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Data</h2>
             <div class="status-grid">
                 <div class="status-item">
                     <div class="status-value" id="gpsSpeed">N/A</div>
                     <div class="status-label">GPS Speed</div>
                 </div>
                 <div class="status-item">
-                    <div class="status-value" id="fishSpeed">N/A</div>
-                    <div class="status-label">Water Speed</div>
-                </div>
-                <div class="status-item">
                     <div class="status-value" id="servoPercent">0%</div>
-                    <div class="status-label">Throttle</div>
+                    <div class="status-label">Throttle %</div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Fish Hawk Data Card -->
-        <div class="card hidden" id="dataCard">
-            <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Data</h2>
-            <div style="font-size: 12px; color: #666; margin-bottom: 15px; padding: 10px; background: #fef3c7; border-radius: 8px;">
-                ⚠️ <strong>Note:</strong> Fish Hawk data display requires firmware update to expose all characteristics via BLE.
-            </div>
-            <div class="status-grid">
                 <div class="status-item">
                     <div class="status-value" id="surfaceSpeed">--</div>
                     <div class="status-label">Surface Speed (<span id="speedUnits">MPH</span>)</div>
@@ -425,24 +411,32 @@
                 <button class="close-btn" onclick="closeSettings()">×</button>
             </div>
             
-            <!-- Calibration Guide -->
-            <div style="margin-bottom: 25px; padding: 15px; background: #dbeafe; border-radius: 10px; border-left: 4px solid #3b82f6;">
-                <h3 style="font-size: 14px; font-weight: 600; color: #1e40af; margin-bottom: 10px;">
-                    🎛️ Servo Calibration Guide
+            <!-- GPS Status Info (moved to top) -->
+            <div style="margin-bottom: 25px; padding: 20px; background: #f0fdf4; border-radius: 10px; border-left: 4px solid #10b981;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
+                    📡 GPS Status
                 </h3>
-                <div style="font-size: 12px; line-height: 1.6; color: #1e3a8a;">
-                    <p style="margin-bottom: 8px;"><strong>First Time Setup:</strong></p>
-                    <ol style="margin-left: 20px; margin-bottom: 10px;">
-                        <li>Leave Idle=0%, Max=100% below</li>
-                        <li>Switch to <strong>Manual</strong> mode</li>
-                        <li>Slowly increase throttle % until motor starts (find idle)</li>
-                        <li>Continue increasing to find full throttle (find max)</li>
-                        <li>Enter those values below and save</li>
-                    </ol>
-                    <p style="margin-top: 8px; font-size: 11px; color: #3b82f6;">
-                        <strong>Example:</strong> If motor starts at 15% and full throttle is at 85%, set Idle=15 and Max=85. 
-                        Now 0-100% on the main screen maps perfectly to your motor's range!
-                    </p>
+                <div style="font-size: 13px; line-height: 1.6; color: #666;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="font-weight: 600; color: #333;">Status:</div>
+                        <div id="gpsStatusText" style="color: #666;">Checking...</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Satellites:</div>
+                        <div id="gpsSatellites" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Accuracy (HDOP):</div>
+                        <div id="gpsAccuracy" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Fix Quality:</div>
+                        <div id="gpsFixQuality" style="color: #666;">--</div>
+                        
+                        <div style="font-weight: 600; color: #333;">Last Update:</div>
+                        <div id="gpsLastUpdate" style="color: #666;">--</div>
+                    </div>
+                    
+                    <div style="font-size: 11px; color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                        <strong>HDOP Guide:</strong> &lt;1 = Excellent, 1-2 = Good, 2-5 = Moderate, 5-10 = Fair, &gt;10 = Poor
+                    </div>
                 </div>
             </div>
             
@@ -533,35 +527,6 @@
             <button class="control-btn start-btn" onclick="saveSettings()" style="margin-top: 20px;">
                 SAVE SETTINGS
             </button>
-            
-            <!-- GPS Status Info -->
-            <div style="margin-top: 30px; padding: 20px; background: #f0fdf4; border-radius: 10px; border-left: 4px solid #10b981;">
-                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
-                    📡 GPS Status
-                </h3>
-                <div style="font-size: 13px; line-height: 1.6; color: #666;">
-                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 10px;">
-                        <div style="font-weight: 600; color: #333;">Status:</div>
-                        <div id="gpsStatusText" style="color: #666;">Checking...</div>
-                        
-                        <div style="font-weight: 600; color: #333;">Satellites:</div>
-                        <div id="gpsSatellites" style="color: #666;">--</div>
-                        
-                        <div style="font-weight: 600; color: #333;">Accuracy (HDOP):</div>
-                        <div id="gpsAccuracy" style="color: #666;">--</div>
-                        
-                        <div style="font-weight: 600; color: #333;">Fix Quality:</div>
-                        <div id="gpsFixQuality" style="color: #666;">--</div>
-                        
-                        <div style="font-weight: 600; color: #333;">Last Update:</div>
-                        <div id="gpsLastUpdate" style="color: #666;">--</div>
-                    </div>
-                    
-                    <div style="font-size: 11px; color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-                        <strong>HDOP Guide:</strong> &lt;1 = Excellent, 1-2 = Good, 2-5 = Moderate, 5-10 = Fair, &gt;10 = Poor
-                    </div>
-                </div>
-            </div>
             
             <!-- LED Status Reference -->
             <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea;">
@@ -782,13 +747,7 @@
             sysInd.className = 'indicator ' + (enabled ? 'active' : 'inactive');
             sysStatus.textContent = enabled ? 'Running' : 'Standby';
             
-            // Update button
-            const btn = document.getElementById('startBtn');
-            btn.textContent = enabled ? 'STOP' : 'START';
-            btn.className = 'control-btn ' + (enabled ? 'stop-btn' : 'start-btn');
-            systemEnabled = enabled;
-            
-            // Update source indicators
+            // Update source indicators (show status even in standby)
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('fishHawkIndicator').className = 'indicator ' + (fishHawkValid ? 'active' : 'inactive');
         }
@@ -855,8 +814,16 @@
         async function adjustSpeed(delta) {
             const input = document.getElementById('targetSpeed');
             let newSpeed = parseFloat(input.value) + delta;
-            newSpeed = Math.max(0.5, Math.min(10.0, newSpeed));
-            input.value = newSpeed.toFixed(1);
+            
+            // In manual mode, step by 1%, in auto modes step by 0.1 mph
+            if (currentSource === 2) {
+                newSpeed = Math.max(0, Math.min(100, newSpeed));
+                input.value = Math.round(newSpeed).toString();
+            } else {
+                newSpeed = Math.max(0.5, Math.min(10.0, newSpeed));
+                input.value = newSpeed.toFixed(1);
+            }
+            
             await setTargetSpeed();
         }
         
@@ -925,7 +892,6 @@
             document.getElementById('connectCard').classList.remove('hidden');
             document.getElementById('controlCard').classList.add('hidden');
             document.getElementById('statusCard').classList.add('hidden');
-            document.getElementById('dataCard').classList.add('hidden');
             document.getElementById('connectBtn').disabled = false;
         }
         
@@ -933,7 +899,6 @@
             document.getElementById('connectCard').classList.add('hidden');
             document.getElementById('controlCard').classList.remove('hidden');
             document.getElementById('statusCard').classList.remove('hidden');
-            document.getElementById('dataCard').classList.remove('hidden');
         }
         
         function showError(message) {
