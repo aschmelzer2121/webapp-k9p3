@@ -719,17 +719,16 @@
             const value = event.target.value.getFloat32(0, true);
             state.fishHawkSpeed = value;
             
-            // Only update timestamp if firmware says valid AND we have actual data
-            // (state.fishHawkValid is set by handleSystemStatusChange)
-            if (state.fishHawkValid && value > 0.01) {
+            // Track connection based on receiving non-zero speed data
+            // This way we don't rely on firmware's fishHawkValid flag
+            if (value > 0.01) {
                 lastFishHawkUpdate = Date.now();
-            }
-            
-            // Show formatted speed or dashes
-            if (state.fishHawkValid && value >= 0) {
+                state.fishHawkValid = true;  // Set our own flag
                 document.getElementById('probeSpeed').textContent = value.toFixed(1);
             } else {
-                document.getElementById('probeSpeed').textContent = '--';
+                // Zero speed - could be disconnected or stationary
+                // Don't update timestamp, let other data (temp/depth) keep it alive
+                document.getElementById('probeSpeed').textContent = value >= 0 ? value.toFixed(1) : '--';
             }
         }
         
@@ -770,14 +769,19 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            // Check if valid data (not dashes)
-            if (!value.includes('-') && parseFloat(value) >= 0) {
+            // Check if valid data (not dashes) AND not default "00.0"
+            if (!value.includes('-') && value !== '00.0' && parseFloat(value) > 0.01) {
                 // Format with one decimal place
                 const numValue = parseFloat(value);
                 document.getElementById('surfaceSpeed').textContent = numValue.toFixed(1);
                 lastFishHawkUpdate = Date.now();
             } else {
-                document.getElementById('surfaceSpeed').textContent = '--';
+                // Show formatted zero or dashes
+                if (value === '00.0' || parseFloat(value) === 0) {
+                    document.getElementById('surfaceSpeed').textContent = '0.0';
+                } else {
+                    document.getElementById('surfaceSpeed').textContent = '--';
+                }
             }
         }
         
@@ -785,7 +789,8 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            if (!value.includes('-')) {
+            // Only count as valid if not dashes AND not default "--.-"
+            if (!value.includes('-') && value !== '--.-' && parseFloat(value) > 0) {
                 document.getElementById('surfaceTemp').textContent = value;
                 lastFishHawkUpdate = Date.now();
             } else {
@@ -797,7 +802,7 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            if (!value.includes('-')) {
+            if (!value.includes('-') && value !== '--.-' && parseFloat(value) > 0) {
                 document.getElementById('probeTemp').textContent = value;
                 lastFishHawkUpdate = Date.now();
             } else {
@@ -809,7 +814,8 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            if (!value.includes('-')) {
+            // Depth should be a positive number when valid
+            if (!value.includes('-') && value !== '---' && parseInt(value) > 0) {
                 document.getElementById('probeDepth').textContent = value;
                 lastFishHawkUpdate = Date.now();
             } else {
