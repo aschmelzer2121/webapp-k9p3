@@ -402,7 +402,7 @@
                     <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
                 </div>
                 <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
-                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px;">Not Connected</div>
+                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px;">Probe - Not Connected</div>
                 </div>
             </div>
         </div>
@@ -719,7 +719,12 @@
             const value = event.target.value.getFloat32(0, true);
             state.fishHawkSpeed = value;
             state.fishHawkValid = true;
-            lastFishHawkUpdate = Date.now(); // Track update time
+            
+            // Only update timestamp if we got actual valid data
+            if (value > 0) {
+                lastFishHawkUpdate = Date.now();
+            }
+            
             document.getElementById('probeSpeed').textContent = value.toFixed(1);
         }
         
@@ -760,28 +765,41 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             document.getElementById('surfaceSpeed').textContent = value;
-            lastFishHawkUpdate = Date.now(); // Track any Fish Hawk update
+            
+            // Only update timestamp if valid data (not dashes)
+            if (!value.includes('-')) {
+                lastFishHawkUpdate = Date.now();
+            }
         }
         
         function handleFhSurfaceTemp(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             document.getElementById('surfaceTemp').textContent = value;
-            lastFishHawkUpdate = Date.now();
+            
+            if (!value.includes('-')) {
+                lastFishHawkUpdate = Date.now();
+            }
         }
         
         function handleFhProbeTemp(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             document.getElementById('probeTemp').textContent = value;
-            lastFishHawkUpdate = Date.now();
+            
+            if (!value.includes('-')) {
+                lastFishHawkUpdate = Date.now();
+            }
         }
         
         function handleFhProbeDepth(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             document.getElementById('probeDepth').textContent = value;
-            lastFishHawkUpdate = Date.now();
+            
+            if (!value.includes('-')) {
+                lastFishHawkUpdate = Date.now();
+            }
         }
         
         function handleFhSpeedUnits(event) {
@@ -826,7 +844,7 @@
         function checkFishHawkTimeout() {
             if (lastFishHawkUpdate === 0) {
                 // Never received data
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #9ca3af;">Probe - Not Connected</span>';
+                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #ef4444;">Probe - Not Connected</span>';
                 return;
             }
             
