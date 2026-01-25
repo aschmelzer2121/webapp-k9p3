@@ -712,7 +712,7 @@
         function handleGpsSpeedChange(event) {
             const value = event.target.value.getFloat32(0, true);
             state.gpsSpeed = value;
-            document.getElementById('gpsSpeed').textContent = state.gpsValid ? value.toFixed(1) : 'N/A';
+            document.getElementById('gpsSpeed').textContent = state.gpsValid ? value.toFixed(1) : '--';
         }
         
         function handleFishHawkSpeedChange(event) {
@@ -720,15 +720,19 @@
             state.fishHawkSpeed = value;
             
             // Track connection based on receiving non-zero speed data
-            // This way we don't rely on firmware's fishHawkValid flag
             if (value > 0.01) {
                 lastFishHawkUpdate = Date.now();
-                state.fishHawkValid = true;  // Set our own flag
+                state.fishHawkValid = true;
                 document.getElementById('probeSpeed').textContent = value.toFixed(1);
             } else {
-                // Zero speed - could be disconnected or stationary
-                // Don't update timestamp, let other data (temp/depth) keep it alive
-                document.getElementById('probeSpeed').textContent = value >= 0 ? value.toFixed(1) : '--';
+                // Zero or invalid - show dashes if never connected, 0.0 if connected
+                if (lastFishHawkUpdate > 0 && (Date.now() - lastFishHawkUpdate) < 10000) {
+                    // Connected recently, show 0.0 (could be stationary)
+                    document.getElementById('probeSpeed').textContent = '0.0';
+                } else {
+                    // Not connected or disconnected, show dashes
+                    document.getElementById('probeSpeed').textContent = '--';
+                }
             }
         }
         
@@ -753,8 +757,8 @@
             state.gpsValid = gpsValid;
             state.fishHawkValid = fishHawkValid;
             
-            // Update displays to show N/A if invalid
-            document.getElementById('gpsSpeed').textContent = gpsValid ? state.gpsSpeed.toFixed(1) : 'N/A';
+            // Update displays to show -- if invalid
+            document.getElementById('gpsSpeed').textContent = gpsValid ? state.gpsSpeed.toFixed(1) : '--';
             
             // Update source indicators in mode buttons
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
@@ -789,25 +793,32 @@
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            // Only count as valid if not dashes AND not default "--.-"
-            if (!value.includes('-') && value !== '--.-' && parseFloat(value) > 0) {
-                document.getElementById('surfaceTemp').textContent = value;
-                lastFishHawkUpdate = Date.now();
-            } else {
-                document.getElementById('surfaceTemp').textContent = '--';
+            // Accept any valid number (not dashes like "--.-")
+            if (!value.includes('-')) {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    document.getElementById('surfaceTemp').textContent = value;
+                    lastFishHawkUpdate = Date.now();
+                    return;
+                }
             }
+            document.getElementById('surfaceTemp').textContent = '--';
         }
         
         function handleFhProbeTemp(event) {
             const decoder = new TextDecoder();
             const value = decoder.decode(event.target.value);
             
-            if (!value.includes('-') && value !== '--.-' && parseFloat(value) > 0) {
-                document.getElementById('probeTemp').textContent = value;
-                lastFishHawkUpdate = Date.now();
-            } else {
-                document.getElementById('probeTemp').textContent = '--';
+            // Accept any valid number
+            if (!value.includes('-')) {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    document.getElementById('probeTemp').textContent = value;
+                    lastFishHawkUpdate = Date.now();
+                    return;
+                }
             }
+            document.getElementById('probeTemp').textContent = '--';
         }
         
         function handleFhProbeDepth(event) {
