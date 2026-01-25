@@ -331,12 +331,22 @@
             
             <!-- Speed Source Selector -->
             <div class="source-selector">
+                <button class="source-btn" id="manualBtn" onclick="setSpeedSource(2)">
+                    <span style="margin-right: 5px;">🎛️</span>Manual
+                </button>
                 <button class="source-btn active" id="gpsBtn" onclick="setSpeedSource(0)">
                     <span class="indicator" id="gpsIndicator"></span>GPS
                 </button>
                 <button class="source-btn" id="fishHawkBtn" onclick="setSpeedSource(1)">
                     <span class="indicator" id="fishHawkIndicator"></span>Water Speed
                 </button>
+            </div>
+            
+            <!-- Mode-specific labels -->
+            <div style="text-align: center; margin: 15px 0 5px 0;">
+                <span id="modeLabel" style="font-size: 13px; color: #666; font-weight: 600;">
+                    Target Speed
+                </span>
             </div>
             
             <!-- Target Speed Controls -->
@@ -415,6 +425,27 @@
                 <button class="close-btn" onclick="closeSettings()">×</button>
             </div>
             
+            <!-- Calibration Guide -->
+            <div style="margin-bottom: 25px; padding: 15px; background: #dbeafe; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                <h3 style="font-size: 14px; font-weight: 600; color: #1e40af; margin-bottom: 10px;">
+                    🎛️ Servo Calibration Guide
+                </h3>
+                <div style="font-size: 12px; line-height: 1.6; color: #1e3a8a;">
+                    <p style="margin-bottom: 8px;"><strong>First Time Setup:</strong></p>
+                    <ol style="margin-left: 20px; margin-bottom: 10px;">
+                        <li>Leave Idle=0%, Max=100% below</li>
+                        <li>Switch to <strong>Manual</strong> mode</li>
+                        <li>Slowly increase throttle % until motor starts (find idle)</li>
+                        <li>Continue increasing to find full throttle (find max)</li>
+                        <li>Enter those values below and save</li>
+                    </ol>
+                    <p style="margin-top: 8px; font-size: 11px; color: #3b82f6;">
+                        <strong>Example:</strong> If motor starts at 15% and full throttle is at 85%, set Idle=15 and Max=85. 
+                        Now 0-100% on the main screen maps perfectly to your motor's range!
+                    </p>
+                </div>
+            </div>
+            
             <div class="setting-group">
                 <label class="setting-label">Servo Idle Position (%)</label>
                 <input type="number" class="setting-input" id="servoIdle" 
@@ -450,25 +481,53 @@
                 <div class="setting-description">Averaging window for speed feedback (5-120 sec)</div>
             </div>
             
+            <!-- PID Tuning Help -->
+            <div style="margin: 25px 0; padding: 15px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                <h3 style="font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 10px;">
+                    ⚙️ PID Tuning Quick Guide
+                </h3>
+                <div style="font-size: 11px; line-height: 1.6; color: #78350f;">
+                    <p style="margin-bottom: 6px;"><strong>Defaults work for most setups!</strong> Only change if:</p>
+                    <ul style="margin: 8px 0 8px 20px;">
+                        <li><strong>Speed oscillates</strong> → Decrease Kp (try 0.30)</li>
+                        <li><strong>Won't reach target</strong> → Increase Ki (try 0.15)</li>
+                        <li><strong>Overshoots target</strong> → Increase Kd (try 0.10)</li>
+                        <li><strong>Too slow to respond</strong> → Increase Kp (try 0.70)</li>
+                    </ul>
+                    <p style="margin-top: 8px; font-size: 10px; font-style: italic;">
+                        💡 Tip: Try adjusting Speed Smoothing first - often fixes issues without touching PID!
+                    </p>
+                </div>
+            </div>
+            
             <div class="setting-group">
                 <label class="setting-label">PID Proportional (Kp)</label>
                 <input type="number" class="setting-input" id="pidKp" 
                        min="0" max="10" step="0.01" value="0.50">
-                <div class="setting-description">Proportional gain (default: 0.50)</div>
+                <div class="setting-description">
+                    Reaction speed (default: 0.50)<br>
+                    <span style="font-size: 11px; color: #f59e0b;">Lower = gentler | Higher = more aggressive</span>
+                </div>
             </div>
             
             <div class="setting-group">
                 <label class="setting-label">PID Integral (Ki)</label>
                 <input type="number" class="setting-input" id="pidKi" 
                        min="0" max="10" step="0.01" value="0.10">
-                <div class="setting-description">Integral gain (default: 0.10)</div>
+                <div class="setting-description">
+                    Error elimination (default: 0.10)<br>
+                    <span style="font-size: 11px; color: #f59e0b;">Higher = reaches target exactly | Lower = tolerates small errors</span>
+                </div>
             </div>
             
             <div class="setting-group">
                 <label class="setting-label">PID Derivative (Kd)</label>
                 <input type="number" class="setting-input" id="pidKd" 
                        min="0" max="10" step="0.01" value="0.05">
-                <div class="setting-description">Derivative gain (default: 0.05)</div>
+                <div class="setting-description">
+                    Smoothness (default: 0.05)<br>
+                    <span style="font-size: 11px; color: #f59e0b;">Higher = smoother approach | Lower = faster changes allowed</span>
+                </div>
             </div>
             
             <button class="control-btn start-btn" onclick="saveSettings()" style="margin-top: 20px;">
@@ -821,13 +880,37 @@
                 const buffer = new Uint8Array([source]);
                 await charSpeedSource.writeValue(buffer);
                 
-                // Update UI
+                // Update button states
+                document.getElementById('manualBtn').classList.remove('active');
+                document.getElementById('gpsBtn').classList.remove('active');
+                document.getElementById('fishHawkBtn').classList.remove('active');
+                
+                // Update UI based on mode
+                const modeLabel = document.getElementById('modeLabel');
+                const speedInput = document.getElementById('targetSpeed');
+                
                 if (source === 0) {
+                    // GPS mode
                     document.getElementById('gpsBtn').classList.add('active');
-                    document.getElementById('fishHawkBtn').classList.remove('active');
-                } else {
-                    document.getElementById('gpsBtn').classList.remove('active');
+                    modeLabel.textContent = 'Target Speed (GPS)';
+                    speedInput.min = '0.5';
+                    speedInput.max = '10.0';
+                    speedInput.step = '0.1';
+                } else if (source === 1) {
+                    // Fish Hawk mode
                     document.getElementById('fishHawkBtn').classList.add('active');
+                    modeLabel.textContent = 'Target Speed (Water)';
+                    speedInput.min = '0.5';
+                    speedInput.max = '10.0';
+                    speedInput.step = '0.1';
+                } else if (source === 2) {
+                    // Manual mode
+                    document.getElementById('manualBtn').classList.add('active');
+                    modeLabel.textContent = 'Manual Throttle %';
+                    speedInput.min = '0';
+                    speedInput.max = '100';
+                    speedInput.step = '1';
+                    speedInput.value = '0';
                 }
             } catch (error) {
                 console.error('Error setting speed source:', error);
