@@ -402,8 +402,7 @@
                     <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
                 </div>
                 <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
-                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px;">Checking...</div>
-                    <div class="status-label">Fish Hawk Probe</div>
+                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px;">Not Connected</div>
                 </div>
             </div>
         </div>
@@ -812,8 +811,10 @@
         
         function updateFishHawkStatus(isValid) {
             if (isValid) {
-                lastFishHawkUpdate = Date.now();
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #10b981;">Probe - Connected ✓</span>';
+                // Only update timestamp if we're actually getting valid data
+                if (lastFishHawkUpdate > 0) {
+                    lastFishHawkUpdate = Date.now();
+                }
             }
             
             // Start monitoring if not already running
@@ -824,14 +825,15 @@
         
         function checkFishHawkTimeout() {
             if (lastFishHawkUpdate === 0) {
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #666;">Probe - Checking...</span>';
+                // Never received data
+                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #9ca3af;">Probe - Not Connected</span>';
                 return;
             }
             
             const secondsSinceUpdate = Math.floor((Date.now() - lastFishHawkUpdate) / 1000);
             
             if (secondsSinceUpdate < 10) {
-                // Still connected
+                // Still connected (data within last 10 seconds)
                 document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #10b981;">Probe - Connected ✓</span>';
             } else if (secondsSinceUpdate < 3600) {
                 // Disconnected, show time (up to 60 minutes)
