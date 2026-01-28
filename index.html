@@ -663,9 +663,13 @@
                 bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
 
                 step = 'readInitialTarget';
-                const initVal = await charTargetSpeed.readValue();
-                const initSpeed = initVal.getFloat32(0, true);
-                document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(initSpeed).toString() : initSpeed.toFixed(1);
+                try {
+                    const initVal = await charTargetSpeed.readValue();
+                    if (initVal.byteLength >= 4) {
+                        const initSpeed = initVal.getFloat32(0, true);
+                        document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(initSpeed).toString() : initSpeed.toFixed(1);
+                    }
+                } catch(e) { console.warn('Could not read initial target:', e); }
 
                 // Show UI
                 document.getElementById('connectCard').classList.add('hidden');
