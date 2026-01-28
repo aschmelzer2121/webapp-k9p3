@@ -3,26 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kicker Control</title>
+    <title>Kicker Control v44</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
+
+        .container { max-width: 600px; margin: 0 auto; }
+
         .card {
             background: white;
             border-radius: 20px;
@@ -30,60 +23,23 @@
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        
-        h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        
-        .connect-section {
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        .connect-btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #667eea;
-            color: white;
-        }
-        
-        .connect-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .speed-display {
-            text-align: center;
-            margin: 30px 0;
-        }
-        
+
+        h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
+        h2 { font-size: 20px; margin-bottom: 15px; color: #333; }
+
+        .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
+
+        .speed-display { text-align: center; margin: 30px 0; }
+
         .speed-value {
             font-size: 72px;
             font-weight: bold;
             color: #667eea;
             line-height: 1;
         }
-        
-        .speed-label {
-            font-size: 18px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
+
+        .speed-label { font-size: 18px; color: #666; margin-top: 5px; }
+
         .speed-controls {
             display: flex;
             align-items: center;
@@ -91,7 +47,7 @@
             gap: 20px;
             margin: 30px 0;
         }
-        
+
         .speed-btn {
             width: 60px;
             height: 60px;
@@ -108,11 +64,9 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        
-        .speed-btn:active {
-            transform: scale(0.95);
-        }
-        
+
+        .speed-btn:active { transform: scale(0.95); }
+
         .speed-input {
             width: 120px;
             height: 60px;
@@ -123,13 +77,9 @@
             font-weight: bold;
             color: #333;
         }
-        
-        .source-selector {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
+
+        .source-selector { display: flex; gap: 10px; margin: 20px 0; }
+
         .source-btn {
             flex: 1;
             padding: 15px;
@@ -141,13 +91,13 @@
             font-weight: 600;
             transition: all 0.2s;
         }
-        
+
         .source-btn.active {
             background: #667eea;
             color: white;
             border-color: #667eea;
         }
-        
+
         .control-btn {
             width: 100%;
             padding: 18px;
@@ -159,17 +109,11 @@
             transition: all 0.2s;
             margin-top: 10px;
         }
-        
-        .start-btn {
-            background: #10b981;
-            color: white;
-        }
-        
-        .stop-btn {
-            background: #ef4444;
-            color: white;
-        }
-        
+
+        .start-btn { background: #10b981; color: white; }
+        .connect-btn { background: #667eea; color: white; }
+        .connect-btn:disabled { background: #ccc; cursor: not-allowed; }
+
         .indicator {
             display: inline-block;
             width: 12px;
@@ -177,75 +121,47 @@
             border-radius: 50%;
             margin-right: 8px;
         }
-        
+
         .indicator.active {
             background: #10b981;
             box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
         }
-        
-        .indicator.inactive {
-            background: #ef4444;
-        }
-        
+
+        .indicator.inactive { background: #ef4444; }
+
         .status-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin: 20px 0;
         }
-        
+
         .status-item {
             text-align: center;
             padding: 15px;
             background: #f9fafb;
             border-radius: 10px;
         }
-        
-        .status-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .status-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .error-message {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            text-align: center;
-        }
-        
-        /* Settings Panel */
+
+        .status-value { font-size: 24px; font-weight: bold; color: #333; }
+        .status-label { font-size: 12px; color: #666; margin-top: 5px; }
+
         .settings-panel {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
             overflow-y: auto;
             padding: 20px;
         }
-        
+
         .settings-panel.active {
             display: flex;
             align-items: flex-start;
             justify-content: center;
         }
-        
+
         .settings-content {
             background: white;
             border-radius: 20px;
@@ -254,14 +170,14 @@
             width: 100%;
             margin: 20px 0;
         }
-        
+
         .settings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
         }
-        
+
         .close-btn {
             width: 40px;
             height: 40px;
@@ -271,11 +187,9 @@
             font-size: 24px;
             cursor: pointer;
         }
-        
-        .setting-group {
-            margin-bottom: 20px;
-        }
-        
+
+        .setting-group { margin-bottom: 20px; }
+
         .setting-label {
             display: block;
             font-weight: 600;
@@ -283,7 +197,7 @@
             margin-bottom: 8px;
             font-size: 14px;
         }
-        
+
         .setting-input {
             width: 100%;
             padding: 12px;
@@ -291,87 +205,103 @@
             border-radius: 8px;
             font-size: 16px;
         }
-        
-        .setting-input:focus {
-            outline: none;
-            border-color: #667eea;
+
+        .setting-input:focus { outline: none; border-color: #667eea; }
+        .setting-description { font-size: 12px; color: #666; margin-top: 5px; }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
         }
-        
-        .setting-description {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
+
+        .hidden { display: none; }
+
+        .connection-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
         }
+        .badge-wifi { background: #dbeafe; color: #1d4ed8; }
+        .badge-ble { background: #f3e8ff; color: #7c3aed; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Connection Card -->
+        <!-- Connection Card (BLE only) -->
         <div class="card" id="connectCard">
-            <h1>Kicker Control</h1>
-            <div class="subtitle">Web Bluetooth Speed Control</div>
-            <div class="connect-section">
-                <button class="connect-btn" id="connectBtn" onclick="connectToDevice()">
-                    Connect to Kicker Control
+            <h1>Kicker Control <span style="font-size: 14px; color: #999;">v44</span></h1>
+            <div class="subtitle">Detecting connection mode...</div>
+            <div style="text-align: center; padding: 40px 20px;">
+                <button class="control-btn connect-btn" id="connectBtn" onclick="connectBLE()">
+                    Connect via Bluetooth
                 </button>
                 <div class="error-message hidden" id="errorMessage"></div>
             </div>
         </div>
-        
+
         <!-- Main Control Card -->
         <div class="card hidden" id="controlCard">
-            <h1>Kicker Control</h1>
-            
+            <h1>Kicker Control <span style="font-size: 14px; color: #999;">v44</span>
+                <span class="connection-badge" id="connectionBadge"></span>
+            </h1>
+
             <!-- Current Speed Display -->
             <div class="speed-display">
                 <div class="speed-value" id="currentSpeed">0.0</div>
-                <div class="speed-label">MPH</div>
+                <div class="speed-label" id="speedUnit">MPH</div>
             </div>
-            
+
             <!-- Speed Source Selector -->
             <div class="source-selector">
-                <button class="source-btn" id="manualBtn" onclick="setSpeedSource(2)">
+                <button class="source-btn active" id="manualBtn" onclick="setSpeedSource(2)">
                     Manual
                 </button>
-                <button class="source-btn active" id="gpsBtn" onclick="setSpeedSource(0)">
+                <button class="source-btn" id="gpsBtn" onclick="setSpeedSource(0)">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <span class="indicator" id="gpsIndicator"></span>
                         <span>GPS</span>
                     </div>
                 </button>
-                <button class="source-btn" id="fishHawkBtn" onclick="setSpeedSource(1)">
+                <button class="source-btn" id="waterBtn" onclick="setSpeedSource(1)">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <span class="indicator" id="fishHawkIndicator"></span>
+                        <span class="indicator" id="waterIndicator"></span>
                         <span>Water Speed</span>
                     </div>
                 </button>
             </div>
-            
-            <!-- Mode-specific labels -->
+
+            <!-- Mode Label -->
             <div style="text-align: center; margin: 15px 0 5px 0;">
                 <span id="modeLabel" style="font-size: 13px; color: #666; font-weight: 600;">
-                    Target Speed
+                    Manual Throttle %
                 </span>
             </div>
-            
+
             <!-- Target Speed Controls -->
             <div class="speed-controls">
-                <button class="speed-btn" onclick="adjustSpeed(-0.1)">−</button>
-                <input type="number" class="speed-input" id="targetSpeed" 
-                       value="2.5" min="0.5" max="10.0" step="0.1"
+                <button class="speed-btn" onclick="adjustSpeed(-1)">−</button>
+                <input type="number" class="speed-input" id="targetSpeed"
+                       value="25" min="0" max="100" step="1"
                        onchange="setTargetSpeed()">
-                <button class="speed-btn" onclick="adjustSpeed(0.1)">+</button>
+                <button class="speed-btn" onclick="adjustSpeed(1)">+</button>
             </div>
-            
+
             <!-- Settings Button -->
             <button class="control-btn" style="background: #6b7280; color: white; margin-top: 20px;" onclick="openSettings()">
                 SETTINGS
             </button>
         </div>
-        
-        <!-- Combined Data Card -->
-        <div class="card hidden" id="statusCard">
-            <h2 style="font-size: 20px; margin-bottom: 15px; color: #333;">Data</h2>
+
+        <!-- Data Card -->
+        <div class="card hidden" id="dataCard">
+            <h2>Data</h2>
             <div class="status-grid">
                 <div class="status-item">
                     <div class="status-value" id="gpsSpeed">N/A</div>
@@ -402,12 +332,12 @@
                     <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
                 </div>
                 <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
-                    <div class="status-value" id="fishHawkStatus" style="font-size: 16px; color: #ef4444;">Probe - Not Connected</div>
+                    <div class="status-value" id="probeStatus" style="font-size: 16px; color: #ef4444;">Probe - Not Connected</div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Settings Panel -->
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-content">
@@ -415,76 +345,68 @@
                 <h2>Settings</h2>
                 <button class="close-btn" onclick="closeSettings()">×</button>
             </div>
-            
-            <!-- GPS Status Info (moved to top) -->
+
+            <!-- GPS Status -->
             <div style="margin-bottom: 25px; padding: 20px; background: #f0fdf4; border-radius: 10px; border-left: 4px solid #10b981;">
-                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
-                    📡 GPS Status
-                </h3>
+                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">📡 GPS Status</h3>
                 <div style="font-size: 13px; line-height: 1.6; color: #666;">
-                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
                         <div style="font-weight: 600; color: #333;">Status:</div>
-                        <div id="gpsStatusText" style="color: #666;">Checking...</div>
-                        
+                        <div id="gpsStatusText">Checking...</div>
                         <div style="font-weight: 600; color: #333;">Satellites:</div>
-                        <div id="gpsSatellites" style="color: #666;">--</div>
-                        
+                        <div id="gpsSatellites">--</div>
                         <div style="font-weight: 600; color: #333;">Accuracy (HDOP):</div>
-                        <div id="gpsAccuracy" style="color: #666;">--</div>
-                        
+                        <div id="gpsAccuracy">--</div>
                         <div style="font-weight: 600; color: #333;">Fix Quality:</div>
-                        <div id="gpsFixQuality" style="color: #666;">--</div>
-                        
+                        <div id="gpsFixQuality">--</div>
                         <div style="font-weight: 600; color: #333;">Last Update:</div>
-                        <div id="gpsLastUpdate" style="color: #666;">--</div>
+                        <div id="gpsLastUpdate">--</div>
                     </div>
-                    
                     <div style="font-size: 11px; color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
                         <strong>HDOP Guide:</strong> &lt;1 = Excellent, 1-2 = Good, 2-5 = Moderate, 5-10 = Fair, &gt;10 = Poor
                     </div>
                 </div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Servo Idle Position (%)</label>
-                <input type="number" class="setting-input" id="servoIdle" 
-                       min="0" max="100" value="0">
+                <input type="number" class="setting-input" id="servoIdle" min="0" max="100" value="0">
                 <div class="setting-description">Servo position for idle throttle (0-100%)</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Servo Max Position (%)</label>
-                <input type="number" class="setting-input" id="servoMax" 
-                       min="0" max="100" value="100">
+                <input type="number" class="setting-input" id="servoMax" min="0" max="100" value="100">
                 <div class="setting-description">Servo position for full throttle (0-100%)</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Servo Safe Position (%)</label>
-                <input type="number" class="setting-input" id="servoSafe" 
-                       min="0" max="100" value="25">
+                <input type="number" class="setting-input" id="servoSafe" min="0" max="100" value="25">
                 <div class="setting-description">Fallback position on signal loss (recommended: 25%)</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Default Target Speed (mph)</label>
-                <input type="number" class="setting-input" id="defaultSpeed" 
-                       min="0.5" max="10.0" step="0.1" value="2.5">
+                <input type="number" class="setting-input" id="defaultSpeed" min="0.5" max="10.0" step="0.1" value="2.5">
                 <div class="setting-description">Speed to use on startup</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Speed Smoothing (seconds)</label>
-                <input type="number" class="setting-input" id="smoothing" 
-                       min="5" max="120" value="10">
-                <div class="setting-description">Averaging window for speed feedback (5-120 sec)</div>
+                <input type="number" class="setting-input" id="smoothing" min="1" max="120" value="10">
+                <div class="setting-description">Averaging window for speed feedback (1-120 sec)</div>
             </div>
-            
-            <!-- PID Tuning Help -->
+
+            <div class="setting-group">
+                <label class="setting-label">Throttle Rate Limit (us/100ms)</label>
+                <input type="number" class="setting-input" id="rateLimit" min="0" max="500" value="50">
+                <div class="setting-description">Max servo change per control loop. 0 = unlimited, 50 = smooth (default)</div>
+            </div>
+
+            <!-- PID Help -->
             <div style="margin: 25px 0; padding: 15px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                <h3 style="font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 10px;">
-                    ⚙️ PID Tuning Quick Guide
-                </h3>
+                <h3 style="font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 10px;">⚙️ PID Tuning Quick Guide</h3>
                 <div style="font-size: 11px; line-height: 1.6; color: #78350f;">
                     <p style="margin-bottom: 6px;"><strong>Defaults work for most setups!</strong> Only change if:</p>
                     <ul style="margin: 8px 0 8px 20px;">
@@ -498,683 +420,522 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">PID Proportional (Kp)</label>
-                <input type="number" class="setting-input" id="pidKp" 
-                       min="0" max="10" step="0.01" value="0.50">
-                <div class="setting-description">
-                    Reaction speed (default: 0.50)<br>
-                    <span style="font-size: 11px; color: #f59e0b;">Lower = gentler | Higher = more aggressive</span>
-                </div>
+                <input type="number" class="setting-input" id="pidKp" min="0" max="10" step="0.01" value="0.50">
+                <div class="setting-description">Reaction speed (default: 0.50)</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">PID Integral (Ki)</label>
-                <input type="number" class="setting-input" id="pidKi" 
-                       min="0" max="10" step="0.01" value="0.10">
-                <div class="setting-description">
-                    Error elimination (default: 0.10)<br>
-                    <span style="font-size: 11px; color: #f59e0b;">Higher = reaches target exactly | Lower = tolerates small errors</span>
-                </div>
+                <input type="number" class="setting-input" id="pidKi" min="0" max="10" step="0.01" value="0.10">
+                <div class="setting-description">Error elimination (default: 0.10)</div>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">PID Derivative (Kd)</label>
-                <input type="number" class="setting-input" id="pidKd" 
-                       min="0" max="10" step="0.01" value="0.05">
-                <div class="setting-description">
-                    Smoothness (default: 0.05)<br>
-                    <span style="font-size: 11px; color: #f59e0b;">Higher = smoother approach | Lower = faster changes allowed</span>
-                </div>
+                <input type="number" class="setting-input" id="pidKd" min="0" max="10" step="0.01" value="0.05">
+                <div class="setting-description">Smoothness (default: 0.05)</div>
             </div>
-            
+
             <button class="control-btn start-btn" onclick="saveSettings()" style="margin-top: 20px;">
                 SAVE SETTINGS
             </button>
-            
+
             <!-- LED Status Reference -->
             <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea;">
-                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">
-                    RGB LED Status Indicator
-                </h3>
-                <div style="font-size: 13px; line-height: 1.8; color: #666;">
-                    <p style="font-weight: 600; color: #333; margin-bottom: 8px;">LED Status Colors:</p>
-                    
-                    <div style="margin-left: 10px;">
-                        <p><span style="color: #dc2626;">🔴 Red Blink</span> - ERROR! No speed input (GPS or Water Speed)</p>
-                        <p><span style="color: #7c3aed;">🟣 Purple</span> - System actively controlling motor</p>
-                        <p><span style="color: #10b981;">🟢 Green</span> - GPS ready, system in standby</p>
-                        <p><span style="color: #f59e0b;">🟡 Yellow Blink</span> - Searching for GPS signal</p>
-                        <p><span style="color: #f97316;">🟠 Orange Pulse</span> - Phone/tablet connected via BLE</p>
-                        <p><span style="color: #3b82f6;">🔵 Blue</span> - Water Speed only (no GPS)</p>
-                        <p><span style="color: #06b6d4;">🩵 Cyan</span> - Both GPS and Water Speed valid</p>
-                        <p><span style="color: #9ca3af;">⚪ White Blink</span> - System booting/initializing</p>
-                    </div>
-                    
-                    <p style="margin-top: 12px; font-size: 12px; font-style: italic;">
-                        <strong>Priority:</strong> Error states override all others. System state overrides data source indicators.
-                    </p>
-                    
-                    <p style="margin-top: 8px; font-size: 12px;">
-                        See <strong>RGB_LED_Status_Plan.md</strong> for complete technical details and troubleshooting.
-                    </p>
+                <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">RGB LED Status Indicator</h3>
+                <div style="font-size: 13px; line-height: 1.8; color: #666; margin-left: 10px;">
+                    <p><span style="color: #dc2626;">🔴 Red Blink</span> - ERROR! No speed input</p>
+                    <p><span style="color: #7c3aed;">🟣 Purple</span> - System actively controlling</p>
+                    <p><span style="color: #10b981;">🟢 Green</span> - GPS ready, standby</p>
+                    <p><span style="color: #f59e0b;">🟡 Yellow Blink</span> - Searching for GPS</p>
+                    <p><span style="color: #f97316;">🟠 Orange Pulse</span> - BLE device connected</p>
+                    <p><span style="color: #3b82f6;">🔵 Blue</span> - Water Speed only</p>
+                    <p><span style="color: #06b6d4;">🩵 Cyan</span> - Both GPS and Water Speed</p>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // BLE Service and Characteristic UUIDs
+        // ========== CONNECTION MODE ==========
+        let connectionMode = null; // 'wifi' or 'ble'
+        let currentSource = 2;
+        let lastSpeedModeTarget = 2.5;
+        let lastProbeUpdate = 0;
+        let gpsStatusInterval = null;
+        let lastTargetUpdate = 0;
+        let statusInterval = null;
+
+        // BLE variables
+        let bleDevice, bleServer;
+        let charTargetSpeed, charSpeedSource, charSystemStatus;
+        let charCurrentSpeed, charGpsSpeed, charWaterSpeed, charServoPosition;
+
+        // BLE UUIDs
         const SERVICE_CONTROL = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
         const SERVICE_STATUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-        
         const CHAR_TARGET_SPEED = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
-        const CHAR_SYSTEM_ENABLE = '1c95d5e3-d8f7-413a-bf3d-7a2e5d7be87e';
         const CHAR_SPEED_SOURCE = '9a8ca5e4-1f3b-4d5e-8b2f-6c3d4e5f6a7b';
         const CHAR_CURRENT_SPEED = '2d8f3a1b-4c5e-6d7f-8a9b-0c1d2e3f4a5b';
         const CHAR_GPS_SPEED = '3e9f4b2c-5d6f-7e8a-9b0c-1d2e3f4a5b6c';
-        const CHAR_FISHHAWK_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
+        const CHAR_WATER_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
         const CHAR_SERVO_POSITION = '5a1b6d4e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
         const CHAR_SYSTEM_STATUS = '6b2c7e5f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
-        
-        // Fish Hawk data characteristics
-        const CHAR_FH_SURFACE_SPEED = '7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d';
-        const CHAR_FH_SURFACE_TEMP = '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e';
-        const CHAR_FH_PROBE_TEMP = '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f';
-        const CHAR_FH_PROBE_DEPTH = '0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';
-        const CHAR_FH_SPEED_UNITS = '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
-        const CHAR_FH_TEMP_UNITS = '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';
-        const CHAR_FH_DEPTH_UNITS = '3a7b8c9d-0e1f-2a3b-4c5d-6e7f8a9b0c1d';
-        
-        let device;
-        let server;
-        let controlService;
-        let statusService;
-        
-        let charTargetSpeed;
-        let charSystemEnable;
-        let charSpeedSource;
-        let charCurrentSpeed;
-        let charGpsSpeed;
-        let charFishHawkSpeed;
-        let charServoPosition;
-        let charSystemStatus;
-        
-        // Fish Hawk data characteristics
-        let charFhSurfaceSpeed;
-        let charFhSurfaceTemp;
-        let charFhProbeTemp;
-        let charFhProbeDepth;
-        let charFhSpeedUnits;
-        let charFhTempUnits;
-        let charFhDepthUnits;
-        
-        let systemEnabled = false;
-        let currentSource = 0;
-        
-        // State tracking
-        let state = {
-            gpsValid: false,
-            fishHawkValid: false,
-            gpsSpeed: 0,
-            fishHawkSpeed: 0
-        };
-        
-        async function connectToDevice() {
-            try {
-                document.getElementById('connectBtn').disabled = true;
-                document.getElementById('errorMessage').classList.add('hidden');
-                
-                console.log('Requesting Bluetooth Device...');
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ name: 'Kicker Control' }],
-                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS]
-                });
-                
-                console.log('Connecting to GATT Server...');
-                server = await device.gatt.connect();
-                
-                console.log('Getting Services...');
-                controlService = await server.getPrimaryService(SERVICE_CONTROL);
-                statusService = await server.getPrimaryService(SERVICE_STATUS);
-                
-                console.log('Getting Characteristics...');
-                charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
-                charSystemEnable = await controlService.getCharacteristic(CHAR_SYSTEM_ENABLE);
-                charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
-                charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
-                charGpsSpeed = await statusService.getCharacteristic(CHAR_GPS_SPEED);
-                charFishHawkSpeed = await statusService.getCharacteristic(CHAR_FISHHAWK_SPEED);
-                charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
-                charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
-                
-                console.log('Starting Notifications...');
-                await charCurrentSpeed.startNotifications();
-                await charGpsSpeed.startNotifications();
-                await charFishHawkSpeed.startNotifications();
-                await charServoPosition.startNotifications();
-                await charSystemStatus.startNotifications();
-                
-                charCurrentSpeed.addEventListener('characteristicvaluechanged', handleCurrentSpeedChange);
-                charGpsSpeed.addEventListener('characteristicvaluechanged', handleGpsSpeedChange);
-                charFishHawkSpeed.addEventListener('characteristicvaluechanged', handleFishHawkSpeedChange);
-                charServoPosition.addEventListener('characteristicvaluechanged', handleServoPositionChange);
-                charSystemStatus.addEventListener('characteristicvaluechanged', handleSystemStatusChange);
-                
-                // Get Fish Hawk data characteristics
-                console.log('Getting Fish Hawk data characteristics...');
-                charFhSurfaceSpeed = await statusService.getCharacteristic(CHAR_FH_SURFACE_SPEED);
-                charFhSurfaceTemp = await statusService.getCharacteristic(CHAR_FH_SURFACE_TEMP);
-                charFhProbeTemp = await statusService.getCharacteristic(CHAR_FH_PROBE_TEMP);
-                charFhProbeDepth = await statusService.getCharacteristic(CHAR_FH_PROBE_DEPTH);
-                charFhSpeedUnits = await statusService.getCharacteristic(CHAR_FH_SPEED_UNITS);
-                charFhTempUnits = await statusService.getCharacteristic(CHAR_FH_TEMP_UNITS);
-                charFhDepthUnits = await statusService.getCharacteristic(CHAR_FH_DEPTH_UNITS);
-                
-                console.log('Starting Fish Hawk notifications...');
-                await charFhSurfaceSpeed.startNotifications();
-                await charFhSurfaceTemp.startNotifications();
-                await charFhProbeTemp.startNotifications();
-                await charFhProbeDepth.startNotifications();
-                await charFhSpeedUnits.startNotifications();
-                await charFhTempUnits.startNotifications();
-                await charFhDepthUnits.startNotifications();
-                
-                charFhSurfaceSpeed.addEventListener('characteristicvaluechanged', handleFhSurfaceSpeed);
-                charFhSurfaceTemp.addEventListener('characteristicvaluechanged', handleFhSurfaceTemp);
-                charFhProbeTemp.addEventListener('characteristicvaluechanged', handleFhProbeTemp);
-                charFhProbeDepth.addEventListener('characteristicvaluechanged', handleFhProbeDepth);
-                charFhSpeedUnits.addEventListener('characteristicvaluechanged', handleFhSpeedUnits);
-                charFhTempUnits.addEventListener('characteristicvaluechanged', handleFhTempUnits);
-                charFhDepthUnits.addEventListener('characteristicvaluechanged', handleFhDepthUnits);
-                
-                device.addEventListener('gattserverdisconnected', onDisconnected);
-                
-                // Set default target speed in UI
-                document.getElementById('targetSpeed').value = '2.5';
-                
-                console.log('Connected successfully!');
-                showControlInterface();
-                
-            } catch (error) {
-                console.error('Connection error:', error);
-                showError('Failed to connect: ' + error.message);
-                document.getElementById('connectBtn').disabled = false;
-            }
-        }
-        
-        function handleCurrentSpeedChange(event) {
-            const value = event.target.value.getFloat32(0, true);
-            document.getElementById('currentSpeed').textContent = value.toFixed(1);
-        }
-        
-        function handleGpsSpeedChange(event) {
-            const value = event.target.value.getFloat32(0, true);
-            state.gpsSpeed = value;
-            document.getElementById('gpsSpeed').textContent = state.gpsValid ? value.toFixed(1) : '--';
-        }
-        
-        function handleFishHawkSpeedChange(event) {
-            const value = event.target.value.getFloat32(0, true);
-            state.fishHawkSpeed = value;
-            
-            // Track connection based on receiving non-zero speed data
-            if (value > 0.01) {
-                lastFishHawkUpdate = Date.now();
-                state.fishHawkValid = true;
-                document.getElementById('probeSpeed').textContent = value.toFixed(1);
+
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect connection mode based on URL
+            const isLocalAP = window.location.hostname === '192.168.4.1';
+
+            if (isLocalAP) {
+                // WiFi mode - auto connect
+                connectionMode = 'wifi';
+                document.getElementById('connectCard').classList.add('hidden');
+                document.getElementById('controlCard').classList.remove('hidden');
+                document.getElementById('dataCard').classList.remove('hidden');
+                document.getElementById('connectionBadge').textContent = 'WiFi';
+                document.getElementById('connectionBadge').className = 'connection-badge badge-wifi';
+
+                // Start WiFi polling
+                statusInterval = setInterval(updateStatusWiFi, 500);
+                updateStatusWiFi();
             } else {
-                // Zero or invalid - show dashes if never connected, 0.0 if connected
-                if (lastFishHawkUpdate > 0 && (Date.now() - lastFishHawkUpdate) < 10000) {
-                    // Connected recently, show 0.0 (could be stationary)
-                    document.getElementById('probeSpeed').textContent = '0.0';
-                } else {
-                    // Not connected or disconnected, show dashes
-                    document.getElementById('probeSpeed').textContent = '--';
+                // BLE mode - show connect button
+                connectionMode = 'ble';
+                document.querySelector('#connectCard .subtitle').textContent = 'Web Bluetooth Speed Control';
+
+                // Check Web Bluetooth support
+                if (!navigator.bluetooth) {
+                    showError('Web Bluetooth not supported. Use Chrome or Safari on iOS 16.4+');
+                    document.getElementById('connectBtn').disabled = true;
                 }
             }
-        }
-        
-        function handleServoPositionChange(event) {
-            const value = event.target.value.getUint16(0, true);
-            document.getElementById('servoPos').textContent = value;
-            
-            // Calculate throttle percentage
-            const minPos = 1000;
-            const maxPos = 2000;
-            const percent = Math.round(((value - minPos) / (maxPos - minPos)) * 100);
-            document.getElementById('servoPercent').textContent = percent + '%';
-        }
-        
-        function handleSystemStatusChange(event) {
-            const status = event.target.value.getUint8(0);
-            const enabled = (status & 0x01) !== 0;
-            const gpsValid = (status & 0x02) !== 0;
-            const fishHawkValid = (status & 0x04) !== 0;
-            
-            // Update state
-            state.gpsValid = gpsValid;
-            state.fishHawkValid = fishHawkValid;
-            
-            // Update displays to show -- if invalid
-            document.getElementById('gpsSpeed').textContent = gpsValid ? state.gpsSpeed.toFixed(1) : '--';
-            
-            // Update source indicators in mode buttons
-            document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
-            document.getElementById('fishHawkIndicator').className = 'indicator ' + (fishHawkValid ? 'active' : 'inactive');
-            
-            // Update Fish Hawk connection status
-            updateFishHawkStatus(fishHawkValid);
-        }
-        
-        // Fish Hawk data handlers
-        function handleFhSurfaceSpeed(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            
-            // Check if valid data (not dashes) AND not default "00.0"
-            if (!value.includes('-') && value !== '00.0' && parseFloat(value) > 0.01) {
-                // Format with one decimal place
-                const numValue = parseFloat(value);
-                document.getElementById('surfaceSpeed').textContent = numValue.toFixed(1);
-                lastFishHawkUpdate = Date.now();
-            } else {
-                // Show formatted zero or dashes
-                if (value === '00.0' || parseFloat(value) === 0) {
-                    document.getElementById('surfaceSpeed').textContent = '0.0';
-                } else {
-                    document.getElementById('surfaceSpeed').textContent = '--';
-                }
-            }
-        }
-        
-        function handleFhSurfaceTemp(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            
-            // Accept any valid number (not dashes like "--.-")
-            if (!value.includes('-')) {
-                const numValue = parseFloat(value);
-                if (!isNaN(numValue)) {
-                    document.getElementById('surfaceTemp').textContent = value;
-                    lastFishHawkUpdate = Date.now();
-                    return;
-                }
-            }
-            document.getElementById('surfaceTemp').textContent = '--';
-        }
-        
-        function handleFhProbeTemp(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            
-            // Accept any valid number
-            if (!value.includes('-')) {
-                const numValue = parseFloat(value);
-                if (!isNaN(numValue)) {
-                    document.getElementById('probeTemp').textContent = value;
-                    lastFishHawkUpdate = Date.now();
-                    return;
-                }
-            }
-            document.getElementById('probeTemp').textContent = '--';
-        }
-        
-        function handleFhProbeDepth(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            
-            // Depth should be a positive number when valid
-            if (!value.includes('-') && value !== '---' && parseInt(value) > 0) {
-                document.getElementById('probeDepth').textContent = value;
-                lastFishHawkUpdate = Date.now();
-            } else {
-                document.getElementById('probeDepth').textContent = '---';
-            }
-        }
-        
-        function handleFhSpeedUnits(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            document.getElementById('speedUnits').textContent = value;
-            document.getElementById('speedUnits2').textContent = value;
-        }
-        
-        function handleFhTempUnits(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            document.getElementById('tempUnits').textContent = '°' + value;
-            document.getElementById('tempUnits2').textContent = '°' + value;
-        }
-        
-        function handleFhDepthUnits(event) {
-            const decoder = new TextDecoder();
-            const value = decoder.decode(event.target.value);
-            const unit = value === 'F' ? 'ft' : 'm';
-            document.getElementById('depthUnits').textContent = unit;
-        }
-        
-        // Fish Hawk connection tracking
-        let lastFishHawkUpdate = 0;
-        let fishHawkStatusInterval = null;
-        
-        function updateFishHawkStatus(isValid) {
-            if (isValid) {
-                // Only update timestamp if we're actually getting valid data
-                if (lastFishHawkUpdate > 0) {
-                    lastFishHawkUpdate = Date.now();
-                }
-            }
-            
-            // Start monitoring if not already running
-            if (!fishHawkStatusInterval) {
-                fishHawkStatusInterval = setInterval(checkFishHawkTimeout, 1000);
-            }
-        }
-        
-        function checkFishHawkTimeout() {
-            if (lastFishHawkUpdate === 0) {
-                // Never received data
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #ef4444;">Probe - Not Connected</span>';
-                return;
-            }
-            
-            const secondsSinceUpdate = Math.floor((Date.now() - lastFishHawkUpdate) / 1000);
-            
-            if (secondsSinceUpdate < 10) {
-                // Still connected (data within last 10 seconds)
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #10b981;">Probe - Connected ✓</span>';
-            } else if (secondsSinceUpdate < 3600) {
-                // Disconnected, show time (up to 60 minutes)
-                const minutes = Math.floor(secondsSinceUpdate / 60);
-                const seconds = secondsSinceUpdate % 60;
-                let timeStr = '';
-                if (minutes > 0) {
-                    timeStr = minutes + 'm ' + seconds + 's';
-                } else {
-                    timeStr = seconds + 's';
-                }
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #ef4444;">Probe - Disconnected (' + timeStr + ')</span>';
-            } else {
-                // Over 60 minutes, just say disconnected
-                document.getElementById('fishHawkStatus').innerHTML = '<span style="color: #ef4444;">Probe - Disconnected</span>';
-            }
-        }
-        
-        async function toggleSystem() {
-            if (!charSystemEnable) return;
-            
-            try {
-                systemEnabled = !systemEnabled;
-                const buffer = new Uint8Array([systemEnabled ? 1 : 0]);
-                await charSystemEnable.writeValue(buffer);
-            } catch (error) {
-                console.error('Error toggling system:', error);
-                showError('Failed to toggle system');
-            }
-        }
-        
-        async function adjustSpeed(delta) {
-            const input = document.getElementById('targetSpeed');
-            let newSpeed = parseFloat(input.value) + delta;
-            
-            // In manual mode, step by 1%, in auto modes step by 0.1 mph
-            if (currentSource === 2) {
-                newSpeed = Math.max(0, Math.min(100, newSpeed));
-                input.value = Math.round(newSpeed).toString();
-            } else {
-                newSpeed = Math.max(0.5, Math.min(10.0, newSpeed));
-                input.value = newSpeed.toFixed(1);
-            }
-            
-            await setTargetSpeed();
-        }
-        
-        async function setTargetSpeed() {
-            if (!charTargetSpeed) return;
-            
-            try {
-                const speed = parseFloat(document.getElementById('targetSpeed').value);
-                const buffer = new Float32Array([speed]);
-                await charTargetSpeed.writeValue(buffer);
-            } catch (error) {
-                console.error('Error setting target speed:', error);
-            }
-        }
-        
-        async function setSpeedSource(source) {
-            if (!charSpeedSource) return;
-            
-            try {
-                currentSource = source;
-                const buffer = new Uint8Array([source]);
-                await charSpeedSource.writeValue(buffer);
-                
-                // Update button states
-                document.getElementById('manualBtn').classList.remove('active');
-                document.getElementById('gpsBtn').classList.remove('active');
-                document.getElementById('fishHawkBtn').classList.remove('active');
-                
-                // Update UI based on mode
-                const modeLabel = document.getElementById('modeLabel');
-                const speedInput = document.getElementById('targetSpeed');
-                
-                if (source === 0) {
-                    // GPS mode
-                    document.getElementById('gpsBtn').classList.add('active');
-                    modeLabel.textContent = 'Target Speed (GPS)';
-                    speedInput.min = '0.5';
-                    speedInput.max = '10.0';
-                    speedInput.step = '0.1';
-                } else if (source === 1) {
-                    // Fish Hawk mode
-                    document.getElementById('fishHawkBtn').classList.add('active');
-                    modeLabel.textContent = 'Target Speed (Water)';
-                    speedInput.min = '0.5';
-                    speedInput.max = '10.0';
-                    speedInput.step = '0.1';
-                } else if (source === 2) {
-                    // Manual mode
-                    document.getElementById('manualBtn').classList.add('active');
-                    modeLabel.textContent = 'Manual Throttle %';
-                    speedInput.min = '0';
-                    speedInput.max = '100';
-                    speedInput.step = '1';
-                    speedInput.value = '0';
-                }
-            } catch (error) {
-                console.error('Error setting speed source:', error);
-            }
-        }
-        
-        function onDisconnected() {
-            console.log('Device disconnected');
-            showError('Disconnected from Kicker Control');
-            
-            // Reset UI
-            document.getElementById('connectCard').classList.remove('hidden');
-            document.getElementById('controlCard').classList.add('hidden');
-            document.getElementById('statusCard').classList.add('hidden');
-            document.getElementById('connectBtn').disabled = false;
-        }
-        
-        function showControlInterface() {
-            document.getElementById('connectCard').classList.add('hidden');
-            document.getElementById('controlCard').classList.remove('hidden');
-            document.getElementById('statusCard').classList.remove('hidden');
-        }
-        
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
-        }
-        
-        function openSettings() {
-            document.getElementById('settingsPanel').classList.add('active');
-            updateGPSStatus(); // Update GPS info when opening settings
-            // TODO: Load current settings from ESP32
-        }
-        
-        function updateGPSStatus() {
-            // This will be updated via WiFi API polling or BLE characteristics
-            // For now, we'll use WiFi API endpoint
-            fetch('/api/gps')
-                .then(response => response.json())
+        });
+
+        // ========== WIFI FUNCTIONS ==========
+        function updateStatusWiFi() {
+            fetch('/api/status')
+                .then(r => r.json())
                 .then(data => {
-                    // Update status text with color
-                    const statusEl = document.getElementById('gpsStatusText');
-                    if (data.searching) {
-                        statusEl.innerHTML = '<span style="color: #f59e0b;">🔍 Searching for satellites...</span>';
-                    } else if (data.valid) {
-                        statusEl.innerHTML = '<span style="color: #10b981;">✅ GPS Locked</span>';
-                    } else {
-                        statusEl.innerHTML = '<span style="color: #6b7280;">⏸️ No GPS Data</span>';
-                    }
-                    
-                    // Update satellite count
-                    document.getElementById('gpsSatellites').textContent = data.satellites > 0 ? data.satellites : '--';
-                    
-                    // Update HDOP (accuracy)
-                    if (data.hdop > 0) {
-                        let hdopText = data.hdop.toFixed(1);
-                        let hdopColor = '#666';
-                        let hdopLabel = '';
-                        
-                        if (data.hdop < 1) {
-                            hdopColor = '#10b981'; // Green
-                            hdopLabel = ' (Excellent)';
-                        } else if (data.hdop < 2) {
-                            hdopColor = '#10b981'; // Green
-                            hdopLabel = ' (Good)';
-                        } else if (data.hdop < 5) {
-                            hdopColor = '#f59e0b'; // Yellow
-                            hdopLabel = ' (Moderate)';
-                        } else if (data.hdop < 10) {
-                            hdopColor = '#f97316'; // Orange
-                            hdopLabel = ' (Fair)';
-                        } else {
-                            hdopColor = '#dc2626'; // Red
-                            hdopLabel = ' (Poor)';
-                        }
-                        
-                        document.getElementById('gpsAccuracy').innerHTML = 
-                            `<span style="color: ${hdopColor}; font-weight: 600;">${hdopText}${hdopLabel}</span>`;
-                    } else {
-                        document.getElementById('gpsAccuracy').textContent = '--';
-                    }
-                    
-                    // Update fix quality
-                    const fixEl = document.getElementById('gpsFixQuality');
-                    if (data.fixQuality === 3) {
-                        fixEl.innerHTML = '<span style="color: #10b981;">3D Fix</span>';
-                    } else if (data.fixQuality === 2) {
-                        fixEl.innerHTML = '<span style="color: #f59e0b;">2D Fix</span>';
-                    } else {
-                        fixEl.innerHTML = '<span style="color: #6b7280;">No Fix</span>';
-                    }
-                    
-                    // Update last update time
-                    if (data.age >= 0) {
-                        const seconds = Math.floor(data.age / 1000);
-                        if (seconds < 2) {
-                            document.getElementById('gpsLastUpdate').innerHTML = '<span style="color: #10b981;">Just now</span>';
-                        } else if (seconds < 10) {
-                            document.getElementById('gpsLastUpdate').textContent = seconds + ' seconds ago';
-                        } else {
-                            document.getElementById('gpsLastUpdate').innerHTML = '<span style="color: #f59e0b;">' + seconds + ' seconds ago</span>';
-                        }
-                    } else {
-                        document.getElementById('gpsLastUpdate').textContent = '--';
-                    }
+                    updateUIFromStatus(data);
                 })
-                .catch(error => {
-                    console.error('Error fetching GPS status:', error);
-                    // Show offline status
-                    document.getElementById('gpsStatusText').innerHTML = '<span style="color: #6b7280;">Offline</span>';
-                });
+                .catch(e => console.error('Status error:', e));
         }
-        
-        function closeSettings() {
-            document.getElementById('settingsPanel').classList.remove('active');
+
+        function setTargetSpeedWiFi(speed) {
+            fetch('/api/control', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({targetSpeed: speed})
+            }).catch(e => console.error('Speed error:', e));
         }
-        
-        async function saveSettings() {
-            // Get percentage values from UI
-            const idlePercent = parseInt(document.getElementById('servoIdle').value);
-            const maxPercent = parseInt(document.getElementById('servoMax').value);
-            const safePercent = parseInt(document.getElementById('servoSafe').value);
-            
-            // Convert percentages to microseconds (1000-2000 µs range)
-            const servoIdleMicros = 1000 + (idlePercent * 10);
-            const servoMaxMicros = 1000 + (maxPercent * 10);
-            const servoSafeMicros = 1000 + (safePercent * 10);
-            
+
+        function setSpeedSourceWiFi(source) {
+            fetch('/api/control', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({speedSource: source})
+            })
+            .then(() => setTimeout(updateStatusWiFi, 100))
+            .catch(e => console.error('Source error:', e));
+        }
+
+        function loadSettingsWiFi() {
+            fetch('/api/settings')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('servoIdle').value = Math.round((data.servoIdle - 1000) / 10);
+                    document.getElementById('servoMax').value = Math.round((data.servoMax - 1000) / 10);
+                    document.getElementById('servoSafe').value = Math.round((data.servoSafe - 1000) / 10);
+                    document.getElementById('defaultSpeed').value = data.defaultSpeed.toFixed(1);
+                    document.getElementById('smoothing').value = data.smoothing;
+                    document.getElementById('rateLimit').value = data.rateLimit || 50;
+                    document.getElementById('pidKp').value = data.Kp.toFixed(2);
+                    document.getElementById('pidKi').value = data.Ki.toFixed(2);
+                    document.getElementById('pidKd').value = data.Kd.toFixed(2);
+                })
+                .catch(e => console.error('Settings load error:', e));
+        }
+
+        function saveSettingsWiFi() {
             const settings = {
-                servoIdle: servoIdleMicros,
-                servoMax: servoMaxMicros,
-                servoSafe: servoSafeMicros,
+                servoIdle: 1000 + (parseInt(document.getElementById('servoIdle').value) * 10),
+                servoMax: 1000 + (parseInt(document.getElementById('servoMax').value) * 10),
+                servoSafe: 1000 + (parseInt(document.getElementById('servoSafe').value) * 10),
                 defaultSpeed: parseFloat(document.getElementById('defaultSpeed').value),
                 smoothing: parseInt(document.getElementById('smoothing').value),
+                rateLimit: parseInt(document.getElementById('rateLimit').value),
                 Kp: parseFloat(document.getElementById('pidKp').value),
                 Ki: parseFloat(document.getElementById('pidKi').value),
                 Kd: parseFloat(document.getElementById('pidKd').value)
             };
-            
-            // TODO: Send settings to ESP32 via BLE characteristics
-            // For now, just show confirmation
-            alert(`Settings saved!\n\nServo Positions:\nIdle: ${idlePercent}% (${servoIdleMicros}µs)\nMax: ${maxPercent}% (${servoMaxMicros}µs)\nSafe: ${safePercent}% (${servoSafeMicros}µs)\n\nNote: Settings will be sent to ESP32 when firmware supports settings characteristics.`);
-            console.log('Settings to save:', settings);
-            
-            closeSettings();
+
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(settings)
+            })
+            .then(r => r.json())
+            .then(() => { alert('Settings saved!'); closeSettings(); })
+            .catch(e => { console.error('Save error:', e); alert('Error saving!'); });
         }
-        
-        // Check connection mode and Web Bluetooth support
-        window.addEventListener('load', function() {
-            console.log('Page loaded');
-            console.log('Protocol:', window.location.protocol);
-            console.log('Hostname:', window.location.hostname);
-            console.log('navigator.bluetooth exists:', !!navigator.bluetooth);
-            
-            // Detect if we're in WiFi mode (connected to ESP32 directly)
-            const isWiFiMode = window.location.hostname === '192.168.4.1' || 
-                              window.location.hostname === 'localhost' ||
-                              window.location.hostname.startsWith('192.168.');
-            
-            if (isWiFiMode) {
-                // WiFi mode - disable BLE connect button and show WiFi message
-                console.log('WiFi mode detected - BLE connection not available');
-                document.getElementById('connectBtn').style.display = 'none';
-                
-                // Show WiFi mode message
-                const connectSection = document.querySelector('.connect-section');
-                connectSection.innerHTML = `
-                    <h2 style="color: #10b981; margin-bottom: 15px;">✅ WiFi Mode Active</h2>
-                    <p style="color: #666; margin-bottom: 20px;">
-                        You're connected to the ESP32 via WiFi.<br>
-                        All controls below are active via WiFi API.
-                    </p>
-                    <button class="connect-btn" onclick="showControlInterface()" style="background: #10b981;">
-                        Continue to Controls
-                    </button>
-                `;
-                return;
-            }
-            
-            // BLE mode - check for HTTPS and Web Bluetooth support
-            if (window.location.protocol !== 'https:' && window.location.protocol !== 'file:') {
-                showError('Web Bluetooth requires HTTPS. Current protocol: ' + window.location.protocol);
+
+        function updateGPSStatusWiFi() {
+            fetch('/api/gps')
+                .then(r => r.json())
+                .then(data => updateGPSDisplay(data))
+                .catch(e => {
+                    console.error('GPS error:', e);
+                    document.getElementById('gpsStatusText').innerHTML = '<span style="color: #6b7280;">Offline</span>';
+                });
+        }
+
+        // ========== BLE FUNCTIONS ==========
+        async function connectBLE() {
+            try {
                 document.getElementById('connectBtn').disabled = true;
-                return;
+                document.getElementById('errorMessage').classList.add('hidden');
+
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'Kicker Control' }],
+                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS]
+                });
+
+                bleServer = await bleDevice.gatt.connect();
+
+                const controlService = await bleServer.getPrimaryService(SERVICE_CONTROL);
+                const statusService = await bleServer.getPrimaryService(SERVICE_STATUS);
+
+                charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
+                charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
+                charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
+                charGpsSpeed = await statusService.getCharacteristic(CHAR_GPS_SPEED);
+                charWaterSpeed = await statusService.getCharacteristic(CHAR_WATER_SPEED);
+                charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
+                charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
+
+                // Start notifications
+                await charCurrentSpeed.startNotifications();
+                await charGpsSpeed.startNotifications();
+                await charWaterSpeed.startNotifications();
+                await charServoPosition.startNotifications();
+                await charSystemStatus.startNotifications();
+
+                charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
+                    const val = e.target.value.getFloat32(0, true);
+                    document.getElementById('currentSpeed').textContent = (currentSource === 2) ? Math.round(val).toString() : val.toFixed(1);
+                });
+                charGpsSpeed.addEventListener('characteristicvaluechanged', e => {
+                    document.getElementById('gpsSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                });
+                charWaterSpeed.addEventListener('characteristicvaluechanged', e => {
+                    document.getElementById('probeSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                });
+                charServoPosition.addEventListener('characteristicvaluechanged', e => {
+                    const val = e.target.value.getUint16(0, true);
+                    const pct = Math.round(((val - 1000) / 1000) * 100);
+                    document.getElementById('servoPercent').textContent = pct + '%';
+                });
+                charSystemStatus.addEventListener('characteristicvaluechanged', handleBLEStatus);
+
+                bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
+
+                // Read initial target
+                const initVal = await charTargetSpeed.readValue();
+                const initSpeed = initVal.getFloat32(0, true);
+                document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(initSpeed).toString() : initSpeed.toFixed(1);
+
+                // Show UI
+                document.getElementById('connectCard').classList.add('hidden');
+                document.getElementById('controlCard').classList.remove('hidden');
+                document.getElementById('dataCard').classList.remove('hidden');
+                document.getElementById('connectionBadge').textContent = 'Bluetooth';
+                document.getElementById('connectionBadge').className = 'connection-badge badge-ble';
+
+            } catch (error) {
+                console.error('BLE error:', error);
+                showError('Connection failed: ' + error.message);
+                document.getElementById('connectBtn').disabled = false;
             }
-            
-            // Check Web Bluetooth support
-            if (!navigator.bluetooth) {
-                showError('Web Bluetooth not available. Use Bluefy browser on iOS or Chrome on Android.');
-                document.getElementById('connectBtn').disabled = true;
+        }
+
+        function handleBLEStatus(event) {
+            const status = event.target.value.getUint8(0);
+            const gpsValid = (status & 0x02) !== 0;
+            const waterInputValid = (status & 0x04) !== 0;
+            const source = (status >> 4) & 0x03;
+
+            document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
+            document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
+            document.getElementById('gpsSpeed').textContent = gpsValid ? document.getElementById('gpsSpeed').textContent : 'N/A';
+
+            // Update probe status
+            updateProbeStatus(waterInputValid);
+
+            if (source !== currentSource) {
+                currentSource = source;
+                updateSourceButtons();
             }
-        });
+        }
+
+        function onBLEDisconnected() {
+            showError('Disconnected. <button onclick="reconnectBLE()" style="margin-left:10px;padding:5px 15px;border-radius:5px;border:none;background:#667eea;color:white;cursor:pointer;">Reconnect</button>');
+            document.getElementById('connectCard').classList.remove('hidden');
+            document.getElementById('controlCard').classList.add('hidden');
+            document.getElementById('dataCard').classList.add('hidden');
+            document.getElementById('connectBtn').disabled = false;
+        }
+
+        async function reconnectBLE() {
+            document.getElementById('errorMessage').classList.add('hidden');
+            if (bleDevice && bleDevice.gatt) {
+                try {
+                    document.getElementById('connectBtn').disabled = true;
+                    bleServer = await bleDevice.gatt.connect();
+                    // Re-setup would be needed here - for simplicity, do full reconnect
+                    location.reload();
+                } catch (e) {
+                    showError('Reconnect failed: ' + e.message);
+                    document.getElementById('connectBtn').disabled = false;
+                }
+            } else {
+                connectBLE();
+            }
+        }
+
+        async function setTargetSpeedBLE(speed) {
+            if (!charTargetSpeed) return;
+            try {
+                await charTargetSpeed.writeValue(new Float32Array([speed]));
+            } catch (e) {
+                console.error('BLE write error:', e);
+            }
+        }
+
+        async function setSpeedSourceBLE(source) {
+            if (!charSpeedSource) return;
+            try {
+                await charSpeedSource.writeValue(new Uint8Array([source]));
+            } catch (e) {
+                console.error('BLE write error:', e);
+            }
+        }
+
+        // ========== UNIFIED FUNCTIONS ==========
+        function updateUIFromStatus(data) {
+            document.getElementById('currentSpeed').textContent = (currentSource === 2) ?
+                Math.round(data.currentSpeed).toString() : data.currentSpeed.toFixed(1);
+            document.getElementById('gpsSpeed').textContent = data.gpsValid ? data.gpsSpeed.toFixed(1) : 'N/A';
+            document.getElementById('gpsIndicator').className = 'indicator ' + (data.gpsValid ? 'active' : 'inactive');
+            document.getElementById('waterIndicator').className = 'indicator ' + (data.waterInputValid ? 'active' : 'inactive');
+
+            const pct = Math.round(((data.servoPosition - 1000) / 1000) * 100);
+            document.getElementById('servoPercent').textContent = pct + '%';
+
+            // Water input data
+            document.getElementById('surfaceSpeed').textContent = data.surfaceSpeed || '--';
+            document.getElementById('surfaceTemp').textContent = data.surfaceTemp || '--';
+            document.getElementById('probeSpeed').textContent = data.probeSpeed || '--';
+            document.getElementById('probeTemp').textContent = data.probeTemp || '--';
+            document.getElementById('probeDepth').textContent = data.probeDepth || '---';
+
+            if (data.speedUnits) {
+                document.getElementById('speedUnits').textContent = data.speedUnits;
+                document.getElementById('speedUnits2').textContent = data.speedUnits;
+            }
+            if (data.tempUnits) {
+                document.getElementById('tempUnits').textContent = '°' + data.tempUnits;
+                document.getElementById('tempUnits2').textContent = '°' + data.tempUnits;
+            }
+            if (data.depthUnits) {
+                document.getElementById('depthUnits').textContent = data.depthUnits === 'F' ? 'ft' : 'm';
+            }
+
+            updateProbeStatus(data.waterInputValid);
+
+            if (data.speedSource !== currentSource) {
+                currentSource = data.speedSource;
+                updateSourceButtons();
+            }
+
+            // Update target (if not recently changed by user)
+            const input = document.getElementById('targetSpeed');
+            if (document.activeElement !== input && (Date.now() - lastTargetUpdate) > 1000) {
+                input.value = (currentSource === 2) ? Math.round(data.targetSpeed).toString() : data.targetSpeed.toFixed(1);
+            }
+        }
+
+        function updateProbeStatus(valid) {
+            const el = document.getElementById('probeStatus');
+            if (valid) {
+                lastProbeUpdate = Date.now();
+                el.innerHTML = '<span style="color: #10b981;">Probe - Connected ✓</span>';
+            } else if (lastProbeUpdate > 0) {
+                const sec = Math.floor((Date.now() - lastProbeUpdate) / 1000);
+                if (sec < 10) {
+                    el.innerHTML = '<span style="color: #10b981;">Probe - Connected ✓</span>';
+                } else {
+                    const t = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
+                    el.innerHTML = `<span style="color: #ef4444;">Probe - Disconnected (${t})</span>`;
+                }
+            } else {
+                el.innerHTML = '<span style="color: #ef4444;">Probe - Not Connected</span>';
+            }
+        }
+
+        function updateGPSDisplay(data) {
+            const statusEl = document.getElementById('gpsStatusText');
+            if (data.searching) {
+                statusEl.innerHTML = '<span style="color: #f59e0b;">🔍 Searching...</span>';
+            } else if (data.valid) {
+                statusEl.innerHTML = '<span style="color: #10b981;">✅ GPS Locked</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color: #6b7280;">⏸️ No Data</span>';
+            }
+
+            document.getElementById('gpsSatellites').textContent = data.satellites > 0 ? data.satellites : '--';
+
+            if (data.hdop > 0 && data.hdop < 99) {
+                let color = '#666', label = '';
+                if (data.hdop < 1) { color = '#10b981'; label = ' (Excellent)'; }
+                else if (data.hdop < 2) { color = '#10b981'; label = ' (Good)'; }
+                else if (data.hdop < 5) { color = '#f59e0b'; label = ' (Moderate)'; }
+                else if (data.hdop < 10) { color = '#f97316'; label = ' (Fair)'; }
+                else { color = '#dc2626'; label = ' (Poor)'; }
+                document.getElementById('gpsAccuracy').innerHTML = `<span style="color:${color};font-weight:600;">${data.hdop.toFixed(1)}${label}</span>`;
+            } else {
+                document.getElementById('gpsAccuracy').textContent = '--';
+            }
+
+            const fixEl = document.getElementById('gpsFixQuality');
+            if (data.fixQuality === 3) fixEl.innerHTML = '<span style="color:#10b981;">3D Fix</span>';
+            else if (data.fixQuality === 2) fixEl.innerHTML = '<span style="color:#f59e0b;">2D Fix</span>';
+            else fixEl.innerHTML = '<span style="color:#6b7280;">No Fix</span>';
+
+            if (data.age >= 0) {
+                const sec = Math.floor(data.age / 1000);
+                if (sec < 2) document.getElementById('gpsLastUpdate').innerHTML = '<span style="color:#10b981;">Just now</span>';
+                else if (sec < 10) document.getElementById('gpsLastUpdate').textContent = sec + 's ago';
+                else document.getElementById('gpsLastUpdate').innerHTML = `<span style="color:#f59e0b;">${sec}s ago</span>`;
+            } else {
+                document.getElementById('gpsLastUpdate').textContent = '--';
+            }
+        }
+
+        function updateSourceButtons() {
+            document.getElementById('manualBtn').classList.toggle('active', currentSource === 2);
+            document.getElementById('gpsBtn').classList.toggle('active', currentSource === 0);
+            document.getElementById('waterBtn').classList.toggle('active', currentSource === 1);
+
+            const label = document.getElementById('modeLabel');
+            const input = document.getElementById('targetSpeed');
+            const unit = document.getElementById('speedUnit');
+
+            if (currentSource === 0) {
+                label.textContent = 'Target Speed (GPS)';
+                input.min = '0.5'; input.max = '10.0'; input.step = '0.1';
+                unit.textContent = 'MPH';
+            } else if (currentSource === 1) {
+                label.textContent = 'Target Speed (Water)';
+                input.min = '0.5'; input.max = '10.0'; input.step = '0.1';
+                unit.textContent = 'MPH';
+            } else {
+                label.textContent = 'Manual Throttle %';
+                input.min = '0'; input.max = '100'; input.step = '1';
+                unit.textContent = '%';
+            }
+        }
+
+        function setSpeedSource(source) {
+            const oldSource = currentSource;
+            const input = document.getElementById('targetSpeed');
+
+            // Smart mode switching
+            if (oldSource !== source) {
+                if (source === 2) {
+                    if (oldSource === 0 || oldSource === 1) lastSpeedModeTarget = parseFloat(input.value);
+                    input.value = '25';
+                } else if (oldSource === 2) {
+                    input.value = lastSpeedModeTarget.toFixed(1);
+                }
+            }
+
+            currentSource = source;
+            updateSourceButtons();
+
+            if (connectionMode === 'wifi') {
+                setSpeedSourceWiFi(source);
+            } else {
+                setSpeedSourceBLE(source);
+                setTargetSpeed();
+            }
+        }
+
+        function adjustSpeed(delta) {
+            const input = document.getElementById('targetSpeed');
+            let val = parseFloat(input.value);
+
+            if (currentSource === 2) {
+                val += (delta > 0) ? 1 : -1;
+                val = Math.max(0, Math.min(100, val));
+                input.value = Math.round(val).toString();
+            } else {
+                val += delta * 0.1;
+                val = Math.max(0.5, Math.min(10.0, val));
+                input.value = val.toFixed(1);
+            }
+
+            setTargetSpeed();
+        }
+
+        function setTargetSpeed() {
+            lastTargetUpdate = Date.now();
+            const speed = parseFloat(document.getElementById('targetSpeed').value);
+
+            if (connectionMode === 'wifi') {
+                setTargetSpeedWiFi(speed);
+            } else {
+                setTargetSpeedBLE(speed);
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('settingsPanel').classList.add('active');
+
+            if (connectionMode === 'wifi') {
+                loadSettingsWiFi();
+                updateGPSStatusWiFi();
+                if (!gpsStatusInterval) gpsStatusInterval = setInterval(updateGPSStatusWiFi, 2000);
+            }
+            // BLE settings would need additional characteristics - show what we can
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsPanel').classList.remove('active');
+            if (gpsStatusInterval) {
+                clearInterval(gpsStatusInterval);
+                gpsStatusInterval = null;
+            }
+        }
+
+        function saveSettings() {
+            if (connectionMode === 'wifi') {
+                saveSettingsWiFi();
+            } else {
+                // BLE settings save would need additional characteristics
+                alert('Settings saved via WiFi only. Connect to WiFi AP to change settings.');
+                closeSettings();
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.innerHTML = msg;
+            el.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
