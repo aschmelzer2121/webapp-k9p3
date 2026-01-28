@@ -473,10 +473,12 @@
         let bleDevice, bleServer;
         let charTargetSpeed, charSpeedSource, charSystemStatus;
         let charCurrentSpeed, charGpsSpeed, charWaterSpeed, charServoPosition;
+        let bleSettingsChars = {};
 
         // BLE UUIDs
         const SERVICE_CONTROL = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
         const SERVICE_STATUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        const SERVICE_SETTINGS = 'd4e5f6a7-b8c9-4d0e-af1a-2b3c4d5e6f70';
         const CHAR_TARGET_SPEED = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
         const CHAR_SPEED_SOURCE = '9a8ca5e4-1f3b-4d5e-8b2f-6c3d4e5f6a7b';
         const CHAR_CURRENT_SPEED = '2d8f3a1b-4c5e-6d7f-8a9b-0c1d2e3f4a5b';
@@ -484,6 +486,15 @@
         const CHAR_WATER_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
         const CHAR_SERVO_POSITION = '5a1b6d4e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
         const CHAR_SYSTEM_STATUS = '6b2c7e5f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
+        const CHAR_SERVO_IDLE = '4b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e';
+        const CHAR_SERVO_MAX = '5c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f';
+        const CHAR_SERVO_SAFE = '6d0e1f2a-3b4c-5d6e-7f8a-9b0c1d2e3f4a';
+        const CHAR_DEFAULT_SPEED = '7e1f2a3b-4c5d-6e7f-8a9b-0c1d2e3f4a5b';
+        const CHAR_SMOOTHING = '8f2a3b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c';
+        const CHAR_PID_KP = '9a3b4c5d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
+        const CHAR_PID_KI = '0b4c5d6e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
+        const CHAR_PID_KD = '1c5d6e7f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
+        const CHAR_RATE_LIMIT = '2d6e7f8a-9b0c-1d2e-3f4a-5b6c7d8e9f0a';
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function() {
@@ -603,7 +614,7 @@
                 step = 'requestDevice';
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ name: 'Kicker Control' }],
-                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS]
+                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS, SERVICE_SETTINGS]
                 });
 
                 step = 'gatt.connect';
@@ -629,6 +640,27 @@
                 charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
                 step = 'getChar(SYSTEM_STATUS)';
                 charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
+
+                step = 'getService(SETTINGS)';
+                const settingsService = await bleServer.getPrimaryService(SERVICE_SETTINGS);
+                step = 'getChar(SERVO_IDLE)';
+                bleSettingsChars.servoIdle = await settingsService.getCharacteristic(CHAR_SERVO_IDLE);
+                step = 'getChar(SERVO_MAX)';
+                bleSettingsChars.servoMax = await settingsService.getCharacteristic(CHAR_SERVO_MAX);
+                step = 'getChar(SERVO_SAFE)';
+                bleSettingsChars.servoSafe = await settingsService.getCharacteristic(CHAR_SERVO_SAFE);
+                step = 'getChar(DEFAULT_SPEED)';
+                bleSettingsChars.defaultSpeed = await settingsService.getCharacteristic(CHAR_DEFAULT_SPEED);
+                step = 'getChar(SMOOTHING)';
+                bleSettingsChars.smoothing = await settingsService.getCharacteristic(CHAR_SMOOTHING);
+                step = 'getChar(PID_KP)';
+                bleSettingsChars.pidKp = await settingsService.getCharacteristic(CHAR_PID_KP);
+                step = 'getChar(PID_KI)';
+                bleSettingsChars.pidKi = await settingsService.getCharacteristic(CHAR_PID_KI);
+                step = 'getChar(PID_KD)';
+                bleSettingsChars.pidKd = await settingsService.getCharacteristic(CHAR_PID_KD);
+                step = 'getChar(RATE_LIMIT)';
+                bleSettingsChars.rateLimit = await settingsService.getCharacteristic(CHAR_RATE_LIMIT);
 
                 // Start notifications
                 step = 'notify(CURRENT_SPEED)';
@@ -925,6 +957,73 @@
             }
         }
 
+        async function loadSettingsBLE() {
+            try {
+                const idle = (await bleSettingsChars.servoIdle.readValue()).getUint16(0, true);
+                const max = (await bleSettingsChars.servoMax.readValue()).getUint16(0, true);
+                const safe = (await bleSettingsChars.servoSafe.readValue()).getUint16(0, true);
+                const speed = (await bleSettingsChars.defaultSpeed.readValue()).getFloat32(0, true);
+                const smooth = (await bleSettingsChars.smoothing.readValue()).getUint8(0);
+                const kp = (await bleSettingsChars.pidKp.readValue()).getFloat32(0, true);
+                const ki = (await bleSettingsChars.pidKi.readValue()).getFloat32(0, true);
+                const kd = (await bleSettingsChars.pidKd.readValue()).getFloat32(0, true);
+                const rl = (await bleSettingsChars.rateLimit.readValue()).getUint16(0, true);
+
+                document.getElementById('servoIdle').value = Math.round((idle - 1000) / 10);
+                document.getElementById('servoMax').value = Math.round((max - 1000) / 10);
+                document.getElementById('servoSafe').value = Math.round((safe - 1000) / 10);
+                document.getElementById('defaultSpeed').value = speed.toFixed(1);
+                document.getElementById('smoothing').value = smooth;
+                document.getElementById('pidKp').value = kp.toFixed(2);
+                document.getElementById('pidKi').value = ki.toFixed(2);
+                document.getElementById('pidKd').value = kd.toFixed(2);
+                document.getElementById('rateLimit').value = rl;
+            } catch(e) {
+                console.error('BLE settings load error:', e);
+                alert('Error loading settings via BLE');
+            }
+        }
+
+        async function saveSettingsBLE() {
+            try {
+                const idle = 1000 + (parseInt(document.getElementById('servoIdle').value) * 10);
+                const max = 1000 + (parseInt(document.getElementById('servoMax').value) * 10);
+                const safe = 1000 + (parseInt(document.getElementById('servoSafe').value) * 10);
+                const speed = parseFloat(document.getElementById('defaultSpeed').value);
+                const smooth = parseInt(document.getElementById('smoothing').value);
+                const kp = parseFloat(document.getElementById('pidKp').value);
+                const ki = parseFloat(document.getElementById('pidKi').value);
+                const kd = parseFloat(document.getElementById('pidKd').value);
+                const rl = parseInt(document.getElementById('rateLimit').value);
+
+                let buf;
+                buf = new DataView(new ArrayBuffer(2)); buf.setUint16(0, idle, true);
+                await bleSettingsChars.servoIdle.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(2)); buf.setUint16(0, max, true);
+                await bleSettingsChars.servoMax.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(2)); buf.setUint16(0, safe, true);
+                await bleSettingsChars.servoSafe.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(4)); buf.setFloat32(0, speed, true);
+                await bleSettingsChars.defaultSpeed.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(1)); buf.setUint8(0, smooth);
+                await bleSettingsChars.smoothing.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(4)); buf.setFloat32(0, kp, true);
+                await bleSettingsChars.pidKp.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(4)); buf.setFloat32(0, ki, true);
+                await bleSettingsChars.pidKi.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(4)); buf.setFloat32(0, kd, true);
+                await bleSettingsChars.pidKd.writeValue(buf);
+                buf = new DataView(new ArrayBuffer(2)); buf.setUint16(0, rl, true);
+                await bleSettingsChars.rateLimit.writeValue(buf);
+
+                alert('Settings saved!');
+                closeSettings();
+            } catch(e) {
+                console.error('BLE settings save error:', e);
+                alert('Error saving settings via BLE');
+            }
+        }
+
         function openSettings() {
             document.getElementById('settingsPanel').classList.add('active');
 
@@ -932,8 +1031,9 @@
                 loadSettingsWiFi();
                 updateGPSStatusWiFi();
                 if (!gpsStatusInterval) gpsStatusInterval = setInterval(updateGPSStatusWiFi, 2000);
+            } else {
+                loadSettingsBLE();
             }
-            // BLE settings would need additional characteristics - show what we can
         }
 
         function closeSettings() {
@@ -948,9 +1048,7 @@
             if (connectionMode === 'wifi') {
                 saveSettingsWiFi();
             } else {
-                // BLE settings save would need additional characteristics
-                alert('Settings saved via WiFi only. Connect to WiFi AP to change settings.');
-                closeSettings();
+                saveSettingsBLE();
             }
         }
 
