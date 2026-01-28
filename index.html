@@ -666,6 +666,10 @@
                 bleSettingsChars.rateLimit = await settingsService.getCharacteristic(CHAR_RATE_LIMIT);
 
                 // Start notifications
+                step = 'notify(TARGET_SPEED)';
+                await charTargetSpeed.startNotifications();
+                step = 'notify(SPEED_SOURCE)';
+                await charSpeedSource.startNotifications();
                 step = 'notify(CURRENT_SPEED)';
                 await charCurrentSpeed.startNotifications();
                 step = 'notify(GPS_SPEED)';
@@ -694,6 +698,20 @@
                     const val = e.target.value.getUint16(0, true);
                     const pct = Math.round(((val - 1000) / 1000) * 100);
                     document.getElementById('servoPercent').textContent = pct + '%';
+                });
+                charTargetSpeed.addEventListener('characteristicvaluechanged', e => {
+                    const val = e.target.value.getFloat32(0, true);
+                    const input = document.getElementById('targetSpeed');
+                    if (document.activeElement !== input && (Date.now() - lastTargetUpdate) > 1000) {
+                        input.value = (currentSource === 2) ? Math.round(val).toString() : val.toFixed(1);
+                    }
+                });
+                charSpeedSource.addEventListener('characteristicvaluechanged', e => {
+                    const source = e.target.value.getUint8(0);
+                    if (source !== currentSource) {
+                        currentSource = source;
+                        updateSourceButtons();
+                    }
                 });
                 charSystemStatus.addEventListener('characteristicvaluechanged', handleBLEStatus);
                 charGpsInfo.addEventListener('characteristicvaluechanged', handleBLEGpsInfo);
@@ -748,15 +766,6 @@
             if (source !== currentSource) {
                 currentSource = source;
                 updateSourceButtons();
-                // Re-read target speed and format for new mode
-                if (charTargetSpeed) {
-                    charTargetSpeed.readValue().then(v => {
-                        if (v.byteLength >= 4) {
-                            const speed = v.getFloat32(0, true);
-                            document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(speed).toString() : speed.toFixed(1);
-                        }
-                    }).catch(e => console.warn('Could not re-read target speed:', e));
-                }
             }
         }
 
@@ -965,10 +974,12 @@
             }
 
             currentSource = source;
+            lastTargetUpdate = Date.now();
             updateSourceButtons();
 
             if (connectionMode === 'wifi') {
                 setSpeedSourceWiFi(source);
+                setTargetSpeedWiFi(parseFloat(input.value));
             } else {
                 setSpeedSourceBLE(source);
                 setTargetSpeed();
