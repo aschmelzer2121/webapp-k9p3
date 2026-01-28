@@ -595,35 +595,54 @@
 
         // ========== BLE FUNCTIONS ==========
         async function connectBLE() {
+            let step = 'init';
             try {
                 document.getElementById('connectBtn').disabled = true;
                 document.getElementById('errorMessage').classList.add('hidden');
 
+                step = 'requestDevice';
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ name: 'Kicker Control' }],
                     optionalServices: [SERVICE_CONTROL, SERVICE_STATUS]
                 });
 
+                step = 'gatt.connect';
                 bleServer = await bleDevice.gatt.connect();
 
+                step = 'getService(CONTROL)';
                 const controlService = await bleServer.getPrimaryService(SERVICE_CONTROL);
+
+                step = 'getService(STATUS)';
                 const statusService = await bleServer.getPrimaryService(SERVICE_STATUS);
 
+                step = 'getChar(TARGET_SPEED)';
                 charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
+                step = 'getChar(SPEED_SOURCE)';
                 charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
+                step = 'getChar(CURRENT_SPEED)';
                 charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
+                step = 'getChar(GPS_SPEED)';
                 charGpsSpeed = await statusService.getCharacteristic(CHAR_GPS_SPEED);
+                step = 'getChar(WATER_SPEED)';
                 charWaterSpeed = await statusService.getCharacteristic(CHAR_WATER_SPEED);
+                step = 'getChar(SERVO_POSITION)';
                 charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
+                step = 'getChar(SYSTEM_STATUS)';
                 charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
 
                 // Start notifications
+                step = 'notify(CURRENT_SPEED)';
                 await charCurrentSpeed.startNotifications();
+                step = 'notify(GPS_SPEED)';
                 await charGpsSpeed.startNotifications();
+                step = 'notify(WATER_SPEED)';
                 await charWaterSpeed.startNotifications();
+                step = 'notify(SERVO_POSITION)';
                 await charServoPosition.startNotifications();
+                step = 'notify(SYSTEM_STATUS)';
                 await charSystemStatus.startNotifications();
 
+                step = 'event listeners';
                 charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
                     const val = e.target.value.getFloat32(0, true);
                     document.getElementById('currentSpeed').textContent = (currentSource === 2) ? Math.round(val).toString() : val.toFixed(1);
@@ -643,7 +662,7 @@
 
                 bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
 
-                // Read initial target
+                step = 'readInitialTarget';
                 const initVal = await charTargetSpeed.readValue();
                 const initSpeed = initVal.getFloat32(0, true);
                 document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(initSpeed).toString() : initSpeed.toFixed(1);
@@ -656,8 +675,8 @@
                 document.getElementById('connectionBadge').className = 'connection-badge badge-ble';
 
             } catch (error) {
-                console.error('BLE error:', error);
-                showError('Connection failed: ' + error.message);
+                console.error('BLE error at step [' + step + ']:', error);
+                showError('Connection failed at ' + step + ': ' + error.message);
                 document.getElementById('connectBtn').disabled = false;
             }
         }
@@ -920,22 +939,3 @@
                 gpsStatusInterval = null;
             }
         }
-
-        function saveSettings() {
-            if (connectionMode === 'wifi') {
-                saveSettingsWiFi();
-            } else {
-                // BLE settings save would need additional characteristics
-                alert('Settings saved via WiFi only. Connect to WiFi AP to change settings.');
-                closeSettings();
-            }
-        }
-
-        function showError(msg) {
-            const el = document.getElementById('errorMessage');
-            el.innerHTML = msg;
-            el.classList.remove('hidden');
-        }
-    </script>
-</body>
-</html>
