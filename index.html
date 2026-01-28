@@ -471,7 +471,7 @@
 
         // BLE variables
         let bleDevice, bleServer;
-        let charTargetSpeed, charSpeedSource, charSystemStatus;
+        let charTargetSpeed, charSpeedSource, charSystemStatus, charGpsInfo;
         let charCurrentSpeed, charGpsSpeed, charWaterSpeed, charServoPosition;
         let bleSettingsChars = {};
 
@@ -486,6 +486,7 @@
         const CHAR_WATER_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
         const CHAR_SERVO_POSITION = '5a1b6d4e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
         const CHAR_SYSTEM_STATUS = '6b2c7e5f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
+        const CHAR_GPS_INFO = '7c3d8f6a-9b0c-1d2e-3f4a-5b6c7d8e9f0b';
         const CHAR_SERVO_IDLE = '4b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e';
         const CHAR_SERVO_MAX = '5c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f';
         const CHAR_SERVO_SAFE = '6d0e1f2a-3b4c-5d6e-7f8a-9b0c1d2e3f4a';
@@ -640,6 +641,8 @@
                 charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
                 step = 'getChar(SYSTEM_STATUS)';
                 charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
+                step = 'getChar(GPS_INFO)';
+                charGpsInfo = await statusService.getCharacteristic(CHAR_GPS_INFO);
 
                 step = 'getService(SETTINGS)';
                 const settingsService = await bleServer.getPrimaryService(SERVICE_SETTINGS);
@@ -673,6 +676,8 @@
                 await charServoPosition.startNotifications();
                 step = 'notify(SYSTEM_STATUS)';
                 await charSystemStatus.startNotifications();
+                step = 'notify(GPS_INFO)';
+                await charGpsInfo.startNotifications();
 
                 step = 'event listeners';
                 charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
@@ -691,8 +696,18 @@
                     document.getElementById('servoPercent').textContent = pct + '%';
                 });
                 charSystemStatus.addEventListener('characteristicvaluechanged', handleBLEStatus);
+                charGpsInfo.addEventListener('characteristicvaluechanged', handleBLEGpsInfo);
 
                 bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
+
+                step = 'readInitialStatus';
+                try {
+                    const statusVal = await charSystemStatus.readValue();
+                    if (statusVal.byteLength >= 1) {
+                        currentSource = (statusVal.getUint8(0) >> 4) & 0x03;
+                        updateSourceButtons();
+                    }
+                } catch(e) { console.warn('Could not read initial status:', e); }
 
                 step = 'readInitialTarget';
                 try {
@@ -733,7 +748,36 @@
             if (source !== currentSource) {
                 currentSource = source;
                 updateSourceButtons();
+                // Re-read target speed and format for new mode
+                if (charTargetSpeed) {
+                    charTargetSpeed.readValue().then(v => {
+                        if (v.byteLength >= 4) {
+                            const speed = v.getFloat32(0, true);
+                            document.getElementById('targetSpeed').value = (currentSource === 2) ? Math.round(speed).toString() : speed.toFixed(1);
+                        }
+                    }).catch(e => console.warn('Could not re-read target speed:', e));
+                }
             }
+        }
+
+        function handleBLEGpsInfo(event) {
+            const v = event.target.value;
+            if (v.byteLength < 8) return;
+            const sats = v.getUint8(0);
+            const hdop = v.getFloat32(1, true);
+            const fixQuality = v.getUint8(5);
+            const hasData = v.getUint8(6) === 1;
+            const valid = v.getUint8(7) === 1;
+
+            updateGPSDisplay({
+                searching: !valid,
+                valid: valid,
+                hasData: hasData,
+                satellites: sats,
+                hdop: hdop,
+                fixQuality: fixQuality,
+                age: hasData ? 0 : -1
+            });
         }
 
         function onBLEDisconnected() {
@@ -843,7 +887,9 @@
 
         function updateGPSDisplay(data) {
             const statusEl = document.getElementById('gpsStatusText');
-            if (data.searching) {
+            if (!data.hasData) {
+                statusEl.innerHTML = '<span style="color: #dc2626;">⚠️ No GPS Data</span>';
+            } else if (data.searching) {
                 statusEl.innerHTML = '<span style="color: #f59e0b;">🔍 Searching...</span>';
             } else if (data.valid) {
                 statusEl.innerHTML = '<span style="color: #10b981;">✅ GPS Locked</span>';
