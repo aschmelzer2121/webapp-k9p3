@@ -939,3 +939,22 @@
                 gpsStatusInterval = null;
             }
         }
+
+        function saveSettings() {
+            if (connectionMode === 'wifi') {
+                saveSettingsWiFi();
+            } else {
+                // BLE settings save would need additional characteristics
+                alert('Settings saved via WiFi only. Connect to WiFi AP to change settings.');
+                closeSettings();
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.innerHTML = msg;
+            el.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
