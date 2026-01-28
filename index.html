@@ -511,6 +511,9 @@
                 document.getElementById('connectionBadge').textContent = 'WiFi';
                 document.getElementById('connectionBadge').className = 'connection-badge badge-wifi';
 
+                // Initialize UI for current mode
+                updateSourceButtons();
+
                 // Start WiFi polling
                 statusInterval = setInterval(updateStatusWiFi, 500);
                 updateStatusWiFi();
