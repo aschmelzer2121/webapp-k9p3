@@ -469,6 +469,7 @@
         let lastTargetUpdate = 0;
         let statusInterval = null;
         let bleGpsValid = false;
+        let bleServoIdle = 1000, bleServoMax = 2000;
 
         // BLE variables
         let bleDevice, bleServer;
@@ -702,7 +703,8 @@
                 });
                 charServoPosition.addEventListener('characteristicvaluechanged', e => {
                     const val = e.target.value.getUint16(0, true);
-                    const pct = Math.round(((val - 1000) / 1000) * 100);
+                    const range = bleServoMax - bleServoIdle;
+                    const pct = range > 0 ? Math.max(0, Math.min(100, Math.round((val - bleServoIdle) / range * 100))) : 0;
                     document.getElementById('servoPercent').textContent = pct + '%';
                 });
                 charTargetSpeed.addEventListener('characteristicvaluechanged', e => {
@@ -723,6 +725,14 @@
                 charGpsInfo.addEventListener('characteristicvaluechanged', handleBLEGpsInfo);
 
                 bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
+
+                step = 'readServoRange';
+                try {
+                    const idleVal = await bleSettingsChars.servoIdle.readValue();
+                    const maxVal = await bleSettingsChars.servoMax.readValue();
+                    if (idleVal.byteLength >= 2) bleServoIdle = idleVal.getUint16(0, true);
+                    if (maxVal.byteLength >= 2) bleServoMax = maxVal.getUint16(0, true);
+                } catch(e) { console.warn('Could not read servo range:', e); }
 
                 step = 'readInitialStatus';
                 try {
@@ -847,8 +857,7 @@
             document.getElementById('gpsIndicator').className = 'indicator ' + (data.gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (data.waterInputValid ? 'active' : 'inactive');
 
-            const pct = Math.round(((data.servoPosition - 1000) / 1000) * 100);
-            document.getElementById('servoPercent').textContent = pct + '%';
+            document.getElementById('servoPercent').textContent = data.throttlePercent + '%';
 
             // Water input data
             document.getElementById('surfaceSpeed').textContent = data.surfaceSpeed || '--';
