@@ -98,6 +98,14 @@
             border-color: #667eea;
         }
 
+        .source-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            color: #999;
+            border-color: #ddd;
+        }
+
         .control-btn {
             width: 100%;
             padding: 18px;
@@ -469,6 +477,8 @@
         let lastTargetUpdate = 0;
         let statusInterval = null;
         let bleGpsValid = false;
+        let sourceGpsValid = false;
+        let sourceFhValid = false;
         let bleServoIdle = 1000, bleServoMax = 2000;
 
         // BLE variables
@@ -773,6 +783,8 @@
             const source = (status >> 4) & 0x03;
 
             bleGpsValid = gpsValid;
+            sourceGpsValid = gpsValid;
+            sourceFhValid = waterInputValid;
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
             if (!gpsValid) document.getElementById('gpsSpeed').textContent = 'N/A';
@@ -782,8 +794,8 @@
 
             if (source !== currentSource) {
                 currentSource = source;
-                updateSourceButtons();
             }
+            updateSourceButtons();
         }
 
         function handleBLEGpsInfo(event) {
@@ -853,9 +865,11 @@
         function updateUIFromStatus(data) {
             document.getElementById('currentSpeed').textContent = (currentSource === 2) ?
                 Math.round(data.currentSpeed).toString() : data.currentSpeed.toFixed(1);
+            sourceGpsValid = data.gpsValid;
+            sourceFhValid = data.fishHawkValid;
             document.getElementById('gpsSpeed').textContent = data.gpsValid ? data.gpsSpeed.toFixed(1) : 'N/A';
             document.getElementById('gpsIndicator').className = 'indicator ' + (data.gpsValid ? 'active' : 'inactive');
-            document.getElementById('waterIndicator').className = 'indicator ' + (data.waterInputValid ? 'active' : 'inactive');
+            document.getElementById('waterIndicator').className = 'indicator ' + (data.fishHawkValid ? 'active' : 'inactive');
 
             document.getElementById('servoPercent').textContent = data.throttlePercent + '%';
 
@@ -878,7 +892,7 @@
                 document.getElementById('depthUnits').textContent = data.depthUnits === 'F' ? 'ft' : 'm';
             }
 
-            updateProbeStatus(data.waterInputValid);
+            updateProbeStatus(data.fishHawkValid);
 
             if (data.speedSource !== currentSource) {
                 currentSource = data.speedSource;
@@ -956,6 +970,10 @@
             document.getElementById('gpsBtn').classList.toggle('active', currentSource === 0);
             document.getElementById('waterBtn').classList.toggle('active', currentSource === 1);
 
+            // Disable buttons for unavailable sources
+            document.getElementById('gpsBtn').disabled = !sourceGpsValid;
+            document.getElementById('waterBtn').disabled = !sourceFhValid;
+
             const label = document.getElementById('modeLabel');
             const input = document.getElementById('targetSpeed');
             const unit = document.getElementById('speedUnit');
@@ -976,6 +994,10 @@
         }
 
         function setSpeedSource(source) {
+            // Reject unavailable sources
+            if (source === 0 && !sourceGpsValid) return;
+            if (source === 1 && !sourceFhValid) return;
+
             const oldSource = currentSource;
             const input = document.getElementById('targetSpeed');
 
