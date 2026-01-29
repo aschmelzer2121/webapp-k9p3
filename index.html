@@ -455,13 +455,11 @@
             <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea;">
                 <h3 style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 15px;">RGB LED Status Indicator</h3>
                 <div style="font-size: 13px; line-height: 1.8; color: #666; margin-left: 10px;">
-                    <p><span style="color: #dc2626;">🔴 Red Blink</span> - ERROR! No speed input</p>
-                    <p><span style="color: #7c3aed;">🟣 Purple</span> - System actively controlling</p>
-                    <p><span style="color: #10b981;">🟢 Green</span> - GPS ready, standby</p>
-                    <p><span style="color: #f59e0b;">🟡 Yellow Blink</span> - Searching for GPS</p>
-                    <p><span style="color: #f97316;">🟠 Orange Pulse</span> - BLE device connected</p>
-                    <p><span style="color: #3b82f6;">🔵 Blue</span> - Water Speed only</p>
-                    <p><span style="color: #06b6d4;">🩵 Cyan</span> - Both GPS and Water Speed</p>
+                    <p><span style="color: #dc2626;">🔴 Red Fast Blink</span> - No speed source (GPS/Water mode)</p>
+                    <p><span style="color: #f59e0b;">🟡 Yellow Slow Blink</span> - No speed source (Manual mode)</p>
+                    <p><span style="color: #10b981;">🟢 Green</span> - GPS available</p>
+                    <p><span style="color: #3b82f6;">🔵 Blue</span> - Water Speed available</p>
+                    <p><span style="color: #06b6d4;">🩵 Cyan</span> - Both GPS and Water Speed available</p>
                 </div>
             </div>
         </div>
@@ -1155,3 +1153,4 @@
     </script>
 </body>
 </html>
+)=====";
