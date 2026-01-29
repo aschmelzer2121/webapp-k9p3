@@ -468,6 +468,7 @@
         let gpsStatusInterval = null;
         let lastTargetUpdate = 0;
         let statusInterval = null;
+        let bleGpsValid = false;
 
         // BLE variables
         let bleDevice, bleServer;
@@ -692,7 +693,9 @@
                     document.getElementById('currentSpeed').textContent = (currentSource === 2) ? Math.round(val).toString() : val.toFixed(1);
                 });
                 charGpsSpeed.addEventListener('characteristicvaluechanged', e => {
-                    document.getElementById('gpsSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                    if (bleGpsValid) {
+                        document.getElementById('gpsSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                    }
                 });
                 charWaterSpeed.addEventListener('characteristicvaluechanged', e => {
                     document.getElementById('probeSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
@@ -759,9 +762,10 @@
             const waterInputValid = (status & 0x04) !== 0;
             const source = (status >> 4) & 0x03;
 
+            bleGpsValid = gpsValid;
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
-            document.getElementById('gpsSpeed').textContent = gpsValid ? document.getElementById('gpsSpeed').textContent : 'N/A';
+            if (!gpsValid) document.getElementById('gpsSpeed').textContent = 'N/A';
 
             // Update probe status
             updateProbeStatus(waterInputValid);
