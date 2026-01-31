@@ -367,6 +367,8 @@
                         <div id="gpsAccuracy">--</div>
                         <div style="font-weight: 600; color: #333;">Fix Quality:</div>
                         <div id="gpsFixQuality">--</div>
+                        <div style="font-weight: 600; color: #333;">Est. Error:</div>
+                        <div id="gpsError">--</div>
                         <div style="font-weight: 600; color: #333;">Last Update:</div>
                         <div id="gpsLastUpdate">--</div>
                     </div>
@@ -476,13 +478,15 @@
         let statusInterval = null;
         let bleGpsValid = false;
         let sourceGpsValid = false;
-        let sourceFhValid = false;
+        let sourceWaterValid = false;
         let bleServoIdle = 1000, bleServoMax = 2000;
 
         // BLE variables
         let bleDevice, bleServer;
         let charTargetSpeed, charSpeedSource, charSystemStatus, charGpsInfo;
         let charCurrentSpeed, charGpsSpeed, charWaterSpeed, charServoPosition;
+        let charFhSurfaceSpeed, charFhSurfaceTemp, charFhProbeTemp, charFhProbeDepth;
+        let charFhSpeedUnits, charFhTempUnits, charFhDepthUnits;
         let bleSettingsChars = {};
 
         // BLE UUIDs
@@ -506,6 +510,13 @@
         const CHAR_PID_KI = '0b4c5d6e-7f8a-9b0c-1d2e-3f4a5b6c7d8e';
         const CHAR_PID_KD = '1c5d6e7f-8a9b-0c1d-2e3f-4a5b6c7d8e9f';
         const CHAR_RATE_LIMIT = '2d6e7f8a-9b0c-1d2e-3f4a-5b6c7d8e9f0a';
+        const CHAR_FH_SURFACE_SPEED = '7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d';
+        const CHAR_FH_SURFACE_TEMP = '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e';
+        const CHAR_FH_PROBE_TEMP = '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f';
+        const CHAR_FH_PROBE_DEPTH = '0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';
+        const CHAR_FH_SPEED_UNITS = '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
+        const CHAR_FH_TEMP_UNITS = '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';
+        const CHAR_FH_DEPTH_UNITS = '3a7b8c9d-0e1f-2a3b-4c5d-6e7f8a9b0c1d';
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function() {
@@ -657,6 +668,21 @@
                 step = 'getChar(GPS_INFO)';
                 charGpsInfo = await statusService.getCharacteristic(CHAR_GPS_INFO);
 
+                step = 'getChar(FH_SURFACE_SPEED)';
+                charFhSurfaceSpeed = await statusService.getCharacteristic(CHAR_FH_SURFACE_SPEED);
+                step = 'getChar(FH_SURFACE_TEMP)';
+                charFhSurfaceTemp = await statusService.getCharacteristic(CHAR_FH_SURFACE_TEMP);
+                step = 'getChar(FH_PROBE_TEMP)';
+                charFhProbeTemp = await statusService.getCharacteristic(CHAR_FH_PROBE_TEMP);
+                step = 'getChar(FH_PROBE_DEPTH)';
+                charFhProbeDepth = await statusService.getCharacteristic(CHAR_FH_PROBE_DEPTH);
+                step = 'getChar(FH_SPEED_UNITS)';
+                charFhSpeedUnits = await statusService.getCharacteristic(CHAR_FH_SPEED_UNITS);
+                step = 'getChar(FH_TEMP_UNITS)';
+                charFhTempUnits = await statusService.getCharacteristic(CHAR_FH_TEMP_UNITS);
+                step = 'getChar(FH_DEPTH_UNITS)';
+                charFhDepthUnits = await statusService.getCharacteristic(CHAR_FH_DEPTH_UNITS);
+
                 step = 'getService(SETTINGS)';
                 const settingsService = await bleServer.getPrimaryService(SERVICE_SETTINGS);
                 step = 'getChar(SERVO_IDLE)';
@@ -695,6 +721,20 @@
                 await charSystemStatus.startNotifications();
                 step = 'notify(GPS_INFO)';
                 await charGpsInfo.startNotifications();
+                step = 'notify(FH_SURFACE_SPEED)';
+                await charFhSurfaceSpeed.startNotifications();
+                step = 'notify(FH_SURFACE_TEMP)';
+                await charFhSurfaceTemp.startNotifications();
+                step = 'notify(FH_PROBE_TEMP)';
+                await charFhProbeTemp.startNotifications();
+                step = 'notify(FH_PROBE_DEPTH)';
+                await charFhProbeDepth.startNotifications();
+                step = 'notify(FH_SPEED_UNITS)';
+                await charFhSpeedUnits.startNotifications();
+                step = 'notify(FH_TEMP_UNITS)';
+                await charFhTempUnits.startNotifications();
+                step = 'notify(FH_DEPTH_UNITS)';
+                await charFhDepthUnits.startNotifications();
 
                 step = 'event listeners';
                 charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
@@ -707,7 +747,7 @@
                     }
                 });
                 charWaterSpeed.addEventListener('characteristicvaluechanged', e => {
-                    document.getElementById('probeSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                    if (sourceWaterValid) document.getElementById('probeSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
                 });
                 charServoPosition.addEventListener('characteristicvaluechanged', e => {
                     const val = e.target.value.getUint16(0, true);
@@ -731,6 +771,33 @@
                 });
                 charSystemStatus.addEventListener('characteristicvaluechanged', handleBLEStatus);
                 charGpsInfo.addEventListener('characteristicvaluechanged', handleBLEGpsInfo);
+
+                const decoder = new TextDecoder();
+                charFhSurfaceSpeed.addEventListener('characteristicvaluechanged', e => {
+                    if (sourceWaterValid) document.getElementById('surfaceSpeed').textContent = decoder.decode(e.target.value);
+                });
+                charFhSurfaceTemp.addEventListener('characteristicvaluechanged', e => {
+                    if (sourceWaterValid) document.getElementById('surfaceTemp').textContent = decoder.decode(e.target.value);
+                });
+                charFhProbeTemp.addEventListener('characteristicvaluechanged', e => {
+                    if (sourceWaterValid) document.getElementById('probeTemp').textContent = decoder.decode(e.target.value);
+                });
+                charFhProbeDepth.addEventListener('characteristicvaluechanged', e => {
+                    if (sourceWaterValid) document.getElementById('probeDepth').textContent = decoder.decode(e.target.value);
+                });
+                charFhSpeedUnits.addEventListener('characteristicvaluechanged', e => {
+                    const u = decoder.decode(e.target.value);
+                    document.getElementById('speedUnits').textContent = u;
+                    document.getElementById('speedUnits2').textContent = u;
+                });
+                charFhTempUnits.addEventListener('characteristicvaluechanged', e => {
+                    const u = decoder.decode(e.target.value);
+                    document.getElementById('tempUnits').textContent = '°' + u;
+                    document.getElementById('tempUnits2').textContent = '°' + u;
+                });
+                charFhDepthUnits.addEventListener('characteristicvaluechanged', e => {
+                    document.getElementById('depthUnits').textContent = decoder.decode(e.target.value) === 'F' ? 'ft' : 'm';
+                });
 
                 bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnected);
 
@@ -782,7 +849,7 @@
 
             bleGpsValid = gpsValid;
             sourceGpsValid = gpsValid;
-            sourceFhValid = waterInputValid;
+            sourceWaterValid = waterInputValid;
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
             if (!gpsValid) document.getElementById('gpsSpeed').textContent = 'N/A';
@@ -864,7 +931,7 @@
             document.getElementById('currentSpeed').textContent = (currentSource === 2) ?
                 Math.round(data.currentSpeed).toString() : data.currentSpeed.toFixed(1);
             sourceGpsValid = data.gpsValid;
-            sourceFhValid = data.fishHawkValid;
+            sourceWaterValid = data.fishHawkValid;
             document.getElementById('gpsSpeed').textContent = data.gpsValid ? data.gpsSpeed.toFixed(1) : 'N/A';
             document.getElementById('gpsIndicator').className = 'indicator ' + (data.gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (data.fishHawkValid ? 'active' : 'inactive');
@@ -872,11 +939,19 @@
             document.getElementById('servoPercent').textContent = data.throttlePercent + '%';
 
             // Water input data
-            document.getElementById('surfaceSpeed').textContent = data.surfaceSpeed || '--';
-            document.getElementById('surfaceTemp').textContent = data.surfaceTemp || '--';
-            document.getElementById('probeSpeed').textContent = data.probeSpeed || '--';
-            document.getElementById('probeTemp').textContent = data.probeTemp || '--';
-            document.getElementById('probeDepth').textContent = data.probeDepth || '---';
+            if (data.fishHawkValid) {
+                document.getElementById('surfaceSpeed').textContent = data.surfaceSpeed || '--';
+                document.getElementById('surfaceTemp').textContent = data.surfaceTemp || '--';
+                document.getElementById('probeSpeed').textContent = data.probeSpeed || '--';
+                document.getElementById('probeTemp').textContent = data.probeTemp || '--';
+                document.getElementById('probeDepth').textContent = data.probeDepth || '---';
+            } else {
+                document.getElementById('surfaceSpeed').textContent = '--';
+                document.getElementById('surfaceTemp').textContent = '--';
+                document.getElementById('probeSpeed').textContent = '--';
+                document.getElementById('probeTemp').textContent = '--';
+                document.getElementById('probeDepth').textContent = '--';
+            }
 
             if (data.speedUnits) {
                 document.getElementById('speedUnits').textContent = data.speedUnits;
@@ -936,8 +1011,9 @@
 
             document.getElementById('gpsSatellites').textContent = data.satellites > 0 ? data.satellites : '--';
 
+            let color = '#666';
             if (data.hdop > 0 && data.hdop < 99) {
-                let color = '#666', label = '';
+                let label = '';
                 if (data.hdop < 1) { color = '#10b981'; label = ' (Excellent)'; }
                 else if (data.hdop < 2) { color = '#10b981'; label = ' (Good)'; }
                 else if (data.hdop < 5) { color = '#f59e0b'; label = ' (Moderate)'; }
@@ -946,6 +1022,13 @@
                 document.getElementById('gpsAccuracy').innerHTML = `<span style="color:${color};font-weight:600;">${data.hdop.toFixed(1)}${label}</span>`;
             } else {
                 document.getElementById('gpsAccuracy').textContent = '--';
+            }
+
+            if (data.hdop > 0 && data.hdop < 99) {
+                const errFt = (data.hdop * 8.2).toFixed(0);
+                document.getElementById('gpsError').innerHTML = `<span style="color:${color};font-weight:600;">~${errFt} ft</span>`;
+            } else {
+                document.getElementById('gpsError').textContent = '--';
             }
 
             const fixEl = document.getElementById('gpsFixQuality');
@@ -970,7 +1053,7 @@
 
             // Disable buttons for unavailable sources
             document.getElementById('gpsBtn').disabled = !sourceGpsValid;
-            document.getElementById('waterBtn').disabled = !sourceFhValid;
+            document.getElementById('waterBtn').disabled = !sourceWaterValid;
 
             const label = document.getElementById('modeLabel');
             const input = document.getElementById('targetSpeed');
@@ -994,7 +1077,7 @@
         function setSpeedSource(source) {
             // Reject unavailable sources
             if (source === 0 && !sourceGpsValid) return;
-            if (source === 1 && !sourceFhValid) return;
+            if (source === 1 && !sourceWaterValid) return;
 
             const oldSource = currentSource;
             const input = document.getElementById('targetSpeed');
@@ -1153,4 +1236,3 @@
     </script>
 </body>
 </html>
-)=====";
