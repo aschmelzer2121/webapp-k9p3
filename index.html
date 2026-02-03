@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <title>Kicker Control v44</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -238,6 +243,48 @@
         }
         .badge-wifi { background: #dbeafe; color: #1d4ed8; }
         .badge-ble { background: #f3e8ff; color: #7c3aed; }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0 10px 0;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 16px 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .action-btn:active { transform: scale(0.96); }
+        .idle-btn { background: #ea580c; color: white; flex: 2; font-size: 18px; }
+        .idle-btn.active { background: #10b981; animation: pulse 1.5s infinite; }
+        .drag-btn { background: #d97706; color: white; }
+        .drag-btn.active { background: #3b82f6; }
+        .hunt-btn { background: #7c3aed; color: white; }
+        .hunt-btn.active { animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .idle-history {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .settings-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -277,7 +324,7 @@
                         <span>GPS</span>
                     </div>
                 </button>
-                <button class="source-btn" id="waterBtn" onclick="setSpeedSource(1)">
+                <button class="source-btn hidden" id="waterBtn" onclick="setSpeedSource(1)">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <span class="indicator" id="waterIndicator"></span>
                         <span>Water Speed</span>
@@ -301,6 +348,14 @@
                 <button class="speed-btn" onclick="adjustSpeed(1)">+</button>
             </div>
 
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn idle-btn" id="idleBtn" onclick="toggleIdle()">IDLE</button>
+                <button class="action-btn drag-btn" id="dragBtn" onclick="toggleDrag()">DRAG</button>
+                <button class="action-btn hunt-btn" id="huntBtn" onclick="toggleHunt()">HUNT</button>
+            </div>
+            <div class="idle-history" id="idleHistory"></div>
+
             <!-- Settings Button -->
             <button class="control-btn" style="background: #6b7280; color: white; margin-top: 20px;" onclick="openSettings()">
                 SETTINGS
@@ -319,28 +374,32 @@
                     <div class="status-value" id="servoPercent">0%</div>
                     <div class="status-label">Throttle %</div>
                 </div>
-                <div class="status-item">
-                    <div class="status-value" id="surfaceSpeed">--</div>
-                    <div class="status-label">Surface Speed (<span id="speedUnits">MPH</span>)</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="surfaceTemp">--</div>
-                    <div class="status-label">Surface Temp (<span id="tempUnits">°F</span>)</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="probeSpeed">--</div>
-                    <div class="status-label">Probe Speed (<span id="speedUnits2">MPH</span>)</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="probeTemp">--</div>
-                    <div class="status-label">Probe Temp (<span id="tempUnits2">°F</span>)</div>
-                </div>
-                <div class="status-item" style="grid-column: 1 / -1;">
-                    <div class="status-value" id="probeDepth">---</div>
-                    <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
-                </div>
-                <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
-                    <div class="status-value" id="probeStatus" style="font-size: 16px; color: #ef4444;">Probe - Not Connected</div>
+                <div id="fishHawkSection" class="hidden" style="display: none; grid-column: 1 / -1;">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-value" id="surfaceSpeed">--</div>
+                            <div class="status-label">Surface Speed (<span id="speedUnits">MPH</span>)</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="surfaceTemp">--</div>
+                            <div class="status-label">Surface Temp (<span id="tempUnits">°F</span>)</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="probeSpeed">--</div>
+                            <div class="status-label">Probe Speed (<span id="speedUnits2">MPH</span>)</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="probeTemp">--</div>
+                            <div class="status-label">Probe Temp (<span id="tempUnits2">°F</span>)</div>
+                        </div>
+                        <div class="status-item" style="grid-column: 1 / -1;">
+                            <div class="status-value" id="probeDepth">---</div>
+                            <div class="status-label">Probe Depth (<span id="depthUnits">ft</span>)</div>
+                        </div>
+                        <div class="status-item" style="grid-column: 1 / -1; background: #f9fafb;">
+                            <div class="status-value" id="probeStatus" style="font-size: 16px; color: #ef4444;">Probe - Not Connected</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -414,6 +473,54 @@
                 <div class="setting-description">Max servo change per control loop. 0 = unlimited, 50 = smooth (default)</div>
             </div>
 
+            <!-- Hunt Mode Settings -->
+            <div class="settings-section-title">Hunt Mode</div>
+
+            <div class="setting-group">
+                <label class="setting-label">Hunt Min Speed</label>
+                <input type="number" class="setting-input" id="huntMinSpeed" min="0" max="100" step="0.1" value="1.5">
+                <div class="setting-description">Minimum speed in cycle (mph or % in manual mode)</div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Hunt Max Speed</label>
+                <input type="number" class="setting-input" id="huntMaxSpeed" min="0" max="100" step="0.1" value="3.0">
+                <div class="setting-description">Maximum speed in cycle (mph or % in manual mode)</div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Hunt Steps</label>
+                <input type="number" class="setting-input" id="huntSteps" min="2" max="6" step="1" value="4">
+                <div class="setting-description">Number of speed steps (2-6)</div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Hunt Interval (seconds)</label>
+                <input type="number" class="setting-input" id="huntInterval" min="10" max="600" step="1" value="100">
+                <div class="setting-description">Time at each speed step (10-600 sec)</div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Surge Duration (seconds)</label>
+                <input type="number" class="setting-input" id="huntSurge" min="0" max="30" step="1" value="10">
+                <div class="setting-description">Brief speed burst on step change (0 = off)</div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Stall Duration (seconds)</label>
+                <input type="number" class="setting-input" id="huntStall" min="0" max="30" step="1" value="15">
+                <div class="setting-description">Brief speed drop on step change (0 = off)</div>
+            </div>
+
+            <!-- Fish Fight Settings -->
+            <div class="settings-section-title">Fish Fight</div>
+
+            <div class="setting-group">
+                <label class="setting-label">Drag Speed</label>
+                <input type="number" class="setting-input" id="dragSpeed" min="0" max="100" step="0.1" value="1.0">
+                <div class="setting-description">Speed when fighting a fish (mph or % in manual mode)</div>
+            </div>
+
             <!-- PID Help -->
             <div style="margin: 25px 0; padding: 15px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
                 <h3 style="font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 10px;">⚙️ PID Tuning Quick Guide</h3>
@@ -480,6 +587,7 @@
         let sourceGpsValid = false;
         let sourceWaterValid = false;
         let bleServoIdle = 1000, bleServoMax = 2000;
+        let isIdled = false, isDragMode = false, huntActive = false;
 
         // BLE variables
         let bleDevice, bleServer;
@@ -583,30 +691,44 @@
             fetch('/api/settings')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('servoIdle').value = Math.round((data.servoIdle - 1000) / 10);
-                    document.getElementById('servoMax').value = Math.round((data.servoMax - 1000) / 10);
-                    document.getElementById('servoSafe').value = Math.round((data.servoSafe - 1000) / 10);
+                    document.getElementById('servoIdle').value = Math.round((data.servoIdle - 500) / 20);
+                    document.getElementById('servoMax').value = Math.round((data.servoMax - 500) / 20);
+                    document.getElementById('servoSafe').value = Math.round((data.servoSafe - 500) / 20);
                     document.getElementById('defaultSpeed').value = data.defaultSpeed.toFixed(1);
                     document.getElementById('smoothing').value = data.smoothing;
                     document.getElementById('rateLimit').value = data.rateLimit || 50;
                     document.getElementById('pidKp').value = data.Kp.toFixed(2);
                     document.getElementById('pidKi').value = data.Ki.toFixed(2);
                     document.getElementById('pidKd').value = data.Kd.toFixed(2);
+                    if (data.huntMinSpeed !== undefined) document.getElementById('huntMinSpeed').value = parseFloat(data.huntMinSpeed).toFixed(1);
+                    if (data.huntMaxSpeed !== undefined) document.getElementById('huntMaxSpeed').value = parseFloat(data.huntMaxSpeed).toFixed(1);
+                    if (data.huntSteps !== undefined) document.getElementById('huntSteps').value = data.huntSteps;
+                    if (data.huntIntervalSec !== undefined) document.getElementById('huntInterval').value = data.huntIntervalSec;
+                    if (data.huntSurgeSec !== undefined) document.getElementById('huntSurge').value = data.huntSurgeSec;
+                    if (data.huntStallSec !== undefined) document.getElementById('huntStall').value = data.huntStallSec;
+                    if (data.dragSpeed !== undefined) document.getElementById('dragSpeed').value = parseFloat(data.dragSpeed).toFixed(1);
                 })
                 .catch(e => console.error('Settings load error:', e));
         }
 
         function saveSettingsWiFi() {
             const settings = {
-                servoIdle: 1000 + (parseInt(document.getElementById('servoIdle').value) * 10),
-                servoMax: 1000 + (parseInt(document.getElementById('servoMax').value) * 10),
-                servoSafe: 1000 + (parseInt(document.getElementById('servoSafe').value) * 10),
+                servoIdle: 500 + (parseInt(document.getElementById('servoIdle').value) * 20),
+                servoMax: 500 + (parseInt(document.getElementById('servoMax').value) * 20),
+                servoSafe: 500 + (parseInt(document.getElementById('servoSafe').value) * 20),
                 defaultSpeed: parseFloat(document.getElementById('defaultSpeed').value),
                 smoothing: parseInt(document.getElementById('smoothing').value),
                 rateLimit: parseInt(document.getElementById('rateLimit').value),
                 Kp: parseFloat(document.getElementById('pidKp').value),
                 Ki: parseFloat(document.getElementById('pidKi').value),
-                Kd: parseFloat(document.getElementById('pidKd').value)
+                Kd: parseFloat(document.getElementById('pidKd').value),
+                huntMinSpeed: parseFloat(document.getElementById('huntMinSpeed').value),
+                huntMaxSpeed: parseFloat(document.getElementById('huntMaxSpeed').value),
+                huntSteps: parseInt(document.getElementById('huntSteps').value),
+                huntIntervalSec: parseInt(document.getElementById('huntInterval').value),
+                huntSurgeSec: parseInt(document.getElementById('huntSurge').value),
+                huntStallSec: parseInt(document.getElementById('huntStall').value),
+                dragSpeed: parseFloat(document.getElementById('dragSpeed').value)
             };
 
             fetch('/api/settings', {
@@ -854,7 +976,8 @@
             document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
             if (!gpsValid) document.getElementById('gpsSpeed').textContent = 'N/A';
 
-            // Update probe status
+            // Update Fish Hawk visibility and probe status
+            updateFishHawkVisibility(waterInputValid);
             updateProbeStatus(waterInputValid);
 
             if (source !== currentSource) {
@@ -965,6 +1088,7 @@
                 document.getElementById('depthUnits').textContent = data.depthUnits === 'F' ? 'ft' : 'm';
             }
 
+            updateFishHawkVisibility(data.fishHawkValid);
             updateProbeStatus(data.fishHawkValid);
 
             if (data.speedSource !== currentSource) {
@@ -976,6 +1100,25 @@
             const input = document.getElementById('targetSpeed');
             if (document.activeElement !== input && (Date.now() - lastTargetUpdate) > 1000) {
                 input.value = (currentSource === 2) ? Math.round(data.targetSpeed).toString() : data.targetSpeed.toFixed(1);
+            }
+
+            // Update mode button states
+            if (data.isIdled !== undefined) { isIdled = data.isIdled; updateActionButtons(); }
+            if (data.isDragMode !== undefined) { isDragMode = data.isDragMode; updateActionButtons(); }
+            if (data.huntActive !== undefined) { huntActive = data.huntActive; updateActionButtons(); }
+        }
+
+        function updateFishHawkVisibility(valid) {
+            const section = document.getElementById('fishHawkSection');
+            const waterBtn = document.getElementById('waterBtn');
+            if (valid) {
+                section.style.display = '';
+                section.classList.remove('hidden');
+                waterBtn.classList.remove('hidden');
+            } else {
+                section.style.display = 'none';
+                section.classList.add('hidden');
+                waterBtn.classList.add('hidden');
             }
         }
 
@@ -1145,9 +1288,9 @@
                 const kd = (await bleSettingsChars.pidKd.readValue()).getFloat32(0, true);
                 const rl = (await bleSettingsChars.rateLimit.readValue()).getUint16(0, true);
 
-                document.getElementById('servoIdle').value = Math.round((idle - 1000) / 10);
-                document.getElementById('servoMax').value = Math.round((max - 1000) / 10);
-                document.getElementById('servoSafe').value = Math.round((safe - 1000) / 10);
+                document.getElementById('servoIdle').value = Math.round((idle - 500) / 20);
+                document.getElementById('servoMax').value = Math.round((max - 500) / 20);
+                document.getElementById('servoSafe').value = Math.round((safe - 500) / 20);
                 document.getElementById('defaultSpeed').value = speed.toFixed(1);
                 document.getElementById('smoothing').value = smooth;
                 document.getElementById('pidKp').value = kp.toFixed(2);
@@ -1162,9 +1305,9 @@
 
         async function saveSettingsBLE() {
             try {
-                const idle = 1000 + (parseInt(document.getElementById('servoIdle').value) * 10);
-                const max = 1000 + (parseInt(document.getElementById('servoMax').value) * 10);
-                const safe = 1000 + (parseInt(document.getElementById('servoSafe').value) * 10);
+                const idle = 500 + (parseInt(document.getElementById('servoIdle').value) * 20);
+                const max = 500 + (parseInt(document.getElementById('servoMax').value) * 20);
+                const safe = 500 + (parseInt(document.getElementById('servoSafe').value) * 20);
                 const speed = parseFloat(document.getElementById('defaultSpeed').value);
                 const smooth = parseInt(document.getElementById('smoothing').value);
                 const kp = parseFloat(document.getElementById('pidKp').value);
@@ -1228,10 +1371,80 @@
             }
         }
 
+        // ========== ACTION BUTTON FUNCTIONS ==========
+        function updateActionButtons() {
+            const idleBtn = document.getElementById('idleBtn');
+            const dragBtn = document.getElementById('dragBtn');
+            const huntBtn = document.getElementById('huntBtn');
+            idleBtn.textContent = isIdled ? 'RESUME' : 'IDLE';
+            idleBtn.className = 'action-btn idle-btn' + (isIdled ? ' active' : '');
+            dragBtn.textContent = isDragMode ? 'RESUME' : 'DRAG';
+            dragBtn.className = 'action-btn drag-btn' + (isDragMode ? ' active' : '');
+            huntBtn.textContent = huntActive ? 'HUNT ON' : 'HUNT';
+            huntBtn.className = 'action-btn hunt-btn' + (huntActive ? ' active' : '');
+        }
+
+        function toggleIdle() {
+            if (connectionMode === 'wifi') {
+                fetch('/api/idle', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        isIdled = data.isIdled;
+                        updateActionButtons();
+                        if (isIdled) loadIdleHistory();
+                    })
+                    .catch(e => console.error('Idle error:', e));
+            }
+        }
+
+        function toggleDrag() {
+            if (connectionMode === 'wifi') {
+                fetch('/api/drag', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        isDragMode = data.isDragMode;
+                        updateActionButtons();
+                    })
+                    .catch(e => console.error('Drag error:', e));
+            }
+        }
+
+        function toggleHunt() {
+            if (connectionMode === 'wifi') {
+                fetch('/api/hunt', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        huntActive = data.huntActive;
+                        updateActionButtons();
+                    })
+                    .catch(e => console.error('Hunt error:', e));
+            }
+        }
+
+        function loadIdleHistory() {
+            if (connectionMode !== 'wifi') return;
+            fetch('/api/idle-history')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('idleHistory');
+                    if (data.speeds && data.speeds.length > 0) {
+                        el.textContent = 'Last speeds: ' + data.speeds.join(', ');
+                    } else {
+                        el.textContent = '';
+                    }
+                })
+                .catch(() => {});
+        }
+
         function showError(msg) {
             const el = document.getElementById('errorMessage');
             el.innerHTML = msg;
             el.classList.remove('hidden');
+        }
+
+        // Register service worker for offline PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed:', e));
         }
     </script>
 </body>
