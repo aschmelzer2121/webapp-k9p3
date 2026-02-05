@@ -318,7 +318,7 @@
                 <button class="source-btn active" id="manualBtn" onclick="setSpeedSource(2)">
                     Manual
                 </button>
-                <button class="source-btn" id="gpsBtn" onclick="setSpeedSource(0)">
+                <button class="source-btn hidden" id="gpsBtn" onclick="setSpeedSource(0)">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <span class="indicator" id="gpsIndicator"></span>
                         <span>GPS</span>
@@ -488,6 +488,21 @@
                 <div class="setting-description">Maximum speed in cycle (mph or % in manual mode)</div>
             </div>
 
+            <div class="settings-group">
+                <label>Manual Mode Hunt Settings</label>
+                <div class="input-group">
+                    <label for="huntMinThrottle">Hunt Min Throttle (%)</label>
+                    <input type="number" id="huntMinThrottle" min="0" max="100" step="1">
+                </div>
+                <div class="input-group">
+                    <label for="huntMaxThrottle">Hunt Max Throttle (%)</label>
+                    <input type="number" id="huntMaxThrottle" min="0" max="100" step="1">
+                </div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+                    Used when speed source is Manual (%)
+                </div>
+            </div>
+
             <div class="setting-group">
                 <label class="setting-label">Hunt Steps</label>
                 <input type="number" class="setting-input" id="huntSteps" min="2" max="6" step="1" value="4">
@@ -519,6 +534,14 @@
                 <label class="setting-label">Drag Speed</label>
                 <input type="number" class="setting-input" id="dragSpeed" min="0" max="100" step="0.1" value="1.0">
                 <div class="setting-description">Speed when fighting a fish (mph or % in manual mode)</div>
+            </div>
+
+            <div class="input-group">
+                <label for="dragThrottle">Drag Throttle (Manual Mode %)</label>
+                <input type="number" id="dragThrottle" min="0" max="100" step="1">
+            </div>
+            <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+                Used when speed source is Manual (%)
             </div>
 
             <!-- PID Help -->
@@ -591,7 +614,7 @@
 
         // BLE variables
         let bleDevice, bleServer;
-        let charTargetSpeed, charSpeedSource, charSystemStatus, charGpsInfo;
+        let charTargetSpeed, charSpeedSource, charActionCommand, charSystemStatus, charGpsInfo;
         let charCurrentSpeed, charGpsSpeed, charWaterSpeed, charServoPosition;
         let charFhSurfaceSpeed, charFhSurfaceTemp, charFhProbeTemp, charFhProbeDepth;
         let charFhSpeedUnits, charFhTempUnits, charFhDepthUnits;
@@ -603,6 +626,7 @@
         const SERVICE_SETTINGS = 'd4e5f6a7-b8c9-4d0e-af1a-2b3c4d5e6f70';
         const CHAR_TARGET_SPEED = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
         const CHAR_SPEED_SOURCE = '9a8ca5e4-1f3b-4d5e-8b2f-6c3d4e5f6a7b';
+        const CHAR_ACTION_COMMAND = '8c3d9e4f-0a1b-2c3d-4e5f-6a7b8c9d0e1f';
         const CHAR_CURRENT_SPEED = '2d8f3a1b-4c5e-6d7f-8a9b-0c1d2e3f4a5b';
         const CHAR_GPS_SPEED = '3e9f4b2c-5d6f-7e8a-9b0c-1d2e3f4a5b6c';
         const CHAR_WATER_SPEED = '4f0a5c3d-6e7f-8a9b-0c1d-2e3f4a5b6c7d';
@@ -702,11 +726,14 @@
                     document.getElementById('pidKd').value = data.Kd.toFixed(2);
                     if (data.huntMinSpeed !== undefined) document.getElementById('huntMinSpeed').value = parseFloat(data.huntMinSpeed).toFixed(1);
                     if (data.huntMaxSpeed !== undefined) document.getElementById('huntMaxSpeed').value = parseFloat(data.huntMaxSpeed).toFixed(1);
+                    if (data.huntMinThrottle !== undefined) document.getElementById('huntMinThrottle').value = data.huntMinThrottle;
+                    if (data.huntMaxThrottle !== undefined) document.getElementById('huntMaxThrottle').value = data.huntMaxThrottle;
                     if (data.huntSteps !== undefined) document.getElementById('huntSteps').value = data.huntSteps;
                     if (data.huntIntervalSec !== undefined) document.getElementById('huntInterval').value = data.huntIntervalSec;
                     if (data.huntSurgeSec !== undefined) document.getElementById('huntSurge').value = data.huntSurgeSec;
                     if (data.huntStallSec !== undefined) document.getElementById('huntStall').value = data.huntStallSec;
                     if (data.dragSpeed !== undefined) document.getElementById('dragSpeed').value = parseFloat(data.dragSpeed).toFixed(1);
+                    if (data.dragThrottle !== undefined) document.getElementById('dragThrottle').value = data.dragThrottle;
                 })
                 .catch(e => console.error('Settings load error:', e));
         }
@@ -724,11 +751,14 @@
                 Kd: parseFloat(document.getElementById('pidKd').value),
                 huntMinSpeed: parseFloat(document.getElementById('huntMinSpeed').value),
                 huntMaxSpeed: parseFloat(document.getElementById('huntMaxSpeed').value),
+                huntMinThrottle: parseInt(document.getElementById('huntMinThrottle').value),
+                huntMaxThrottle: parseInt(document.getElementById('huntMaxThrottle').value),
                 huntSteps: parseInt(document.getElementById('huntSteps').value),
                 huntIntervalSec: parseInt(document.getElementById('huntInterval').value),
                 huntSurgeSec: parseInt(document.getElementById('huntSurge').value),
                 huntStallSec: parseInt(document.getElementById('huntStall').value),
-                dragSpeed: parseFloat(document.getElementById('dragSpeed').value)
+                dragSpeed: parseFloat(document.getElementById('dragSpeed').value),
+                dragThrottle: parseInt(document.getElementById('dragThrottle').value)
             };
 
             fetch('/api/settings', {
@@ -777,6 +807,8 @@
                 charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
                 step = 'getChar(SPEED_SOURCE)';
                 charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
+                step = 'getChar(ACTION_COMMAND)';
+                charActionCommand = await controlService.getCharacteristic(CHAR_ACTION_COMMAND);
                 step = 'getChar(CURRENT_SPEED)';
                 charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
                 step = 'getChar(GPS_SPEED)';
@@ -866,6 +898,8 @@
                 charGpsSpeed.addEventListener('characteristicvaluechanged', e => {
                     if (bleGpsValid) {
                         document.getElementById('gpsSpeed').textContent = e.target.value.getFloat32(0, true).toFixed(1);
+                    } else {
+                        document.getElementById('gpsSpeed').textContent = 'N/A';
                     }
                 });
                 charWaterSpeed.addEventListener('characteristicvaluechanged', e => {
@@ -969,12 +1003,25 @@
             const waterInputValid = (status & 0x04) !== 0;
             const source = (status >> 4) & 0x03;
 
+            // Decode action button states from status byte
+            const idled = (status & 0x08) !== 0;
+            const drag = (status & 0x40) !== 0;
+            const hunt = (status & 0x80) !== 0;
+
             bleGpsValid = gpsValid;
             sourceGpsValid = gpsValid;
             sourceWaterValid = waterInputValid;
             document.getElementById('gpsIndicator').className = 'indicator ' + (gpsValid ? 'active' : 'inactive');
             document.getElementById('waterIndicator').className = 'indicator ' + (waterInputValid ? 'active' : 'inactive');
             if (!gpsValid) document.getElementById('gpsSpeed').textContent = 'N/A';
+
+            // Update action button states
+            if (idled !== isIdled || drag !== isDragMode || hunt !== huntActive) {
+                isIdled = idled;
+                isDragMode = drag;
+                huntActive = hunt;
+                updateActionButtons();
+            }
 
             // Update Fish Hawk visibility and probe status
             updateFishHawkVisibility(waterInputValid);
@@ -1109,15 +1156,13 @@
         }
 
         function updateFishHawkVisibility(valid) {
-            const section = document.getElementById('fishHawkSection');
+            const dataCard = document.getElementById('dataCard');
             const waterBtn = document.getElementById('waterBtn');
             if (valid) {
-                section.style.display = '';
-                section.classList.remove('hidden');
+                dataCard.style.display = 'block';
                 waterBtn.classList.remove('hidden');
             } else {
-                section.style.display = 'none';
-                section.classList.add('hidden');
+                dataCard.style.display = 'none';
                 waterBtn.classList.add('hidden');
             }
         }
@@ -1193,6 +1238,17 @@
             document.getElementById('manualBtn').classList.toggle('active', currentSource === 2);
             document.getElementById('gpsBtn').classList.toggle('active', currentSource === 0);
             document.getElementById('waterBtn').classList.toggle('active', currentSource === 1);
+
+            // Show/hide GPS button based on availability (match WiFi behavior)
+            if (sourceGpsValid) {
+                document.getElementById('gpsBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('gpsBtn').classList.add('hidden');
+                // If GPS was active and becomes unavailable, switch to Manual
+                if (currentSource === 0) {
+                    setSpeedSource(2);
+                }
+            }
 
             // Disable buttons for unavailable sources
             document.getElementById('gpsBtn').disabled = !sourceGpsValid;
@@ -1394,6 +1450,11 @@
                         if (isIdled) loadIdleHistory();
                     })
                     .catch(e => console.error('Idle error:', e));
+            } else if (connectionMode === 'ble' && charActionCommand) {
+                const buf = new Uint8Array([0x01]);
+                charActionCommand.writeValue(buf)
+                    .then(() => console.log('Idle command sent'))
+                    .catch(e => console.error('BLE idle error:', e));
             }
         }
 
@@ -1406,6 +1467,11 @@
                         updateActionButtons();
                     })
                     .catch(e => console.error('Drag error:', e));
+            } else if (connectionMode === 'ble' && charActionCommand) {
+                const buf = new Uint8Array([0x02]);
+                charActionCommand.writeValue(buf)
+                    .then(() => console.log('Drag command sent'))
+                    .catch(e => console.error('BLE drag error:', e));
             }
         }
 
@@ -1418,6 +1484,11 @@
                         updateActionButtons();
                     })
                     .catch(e => console.error('Hunt error:', e));
+            } else if (connectionMode === 'ble' && charActionCommand) {
+                const buf = new Uint8Array([0x03]);
+                charActionCommand.writeValue(buf)
+                    .then(() => console.log('Hunt command sent'))
+                    .catch(e => console.error('BLE hunt error:', e));
             }
         }
 
