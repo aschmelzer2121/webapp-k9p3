@@ -800,98 +800,98 @@
                 step = 'gatt.connect';
                 bleServer = await bleDevice.gatt.connect();
 
-                step = 'getService(CONTROL)';
-                const controlService = await bleServer.getPrimaryService(SERVICE_CONTROL);
+                // Get all services in parallel
+                step = 'getServices';
+                const [controlService, statusService, settingsService] = await Promise.all([
+                    bleServer.getPrimaryService(SERVICE_CONTROL),
+                    bleServer.getPrimaryService(SERVICE_STATUS),
+                    bleServer.getPrimaryService(SERVICE_SETTINGS)
+                ]);
 
-                step = 'getService(STATUS)';
-                const statusService = await bleServer.getPrimaryService(SERVICE_STATUS);
+                // Get all characteristics in parallel
+                step = 'getCharacteristics';
+                const [
+                    _charTargetSpeed, _charSpeedSource, _charActionCommand,
+                    _charCurrentSpeed, _charGpsSpeed, _charWaterSpeed, _charServoPosition,
+                    _charSystemStatus, _charGpsInfo,
+                    _charFhSurfaceSpeed, _charFhSurfaceTemp, _charFhProbeTemp, _charFhProbeDepth,
+                    _charFhSpeedUnits, _charFhTempUnits, _charFhDepthUnits,
+                    _servoIdle, _servoMax, _servoSafe, _defaultSpeed, _smoothing,
+                    _pidKp, _pidKi, _pidKd, _rateLimit
+                ] = await Promise.all([
+                    controlService.getCharacteristic(CHAR_TARGET_SPEED),
+                    controlService.getCharacteristic(CHAR_SPEED_SOURCE),
+                    controlService.getCharacteristic(CHAR_ACTION_COMMAND),
+                    statusService.getCharacteristic(CHAR_CURRENT_SPEED),
+                    statusService.getCharacteristic(CHAR_GPS_SPEED),
+                    statusService.getCharacteristic(CHAR_WATER_SPEED),
+                    statusService.getCharacteristic(CHAR_SERVO_POSITION),
+                    statusService.getCharacteristic(CHAR_SYSTEM_STATUS),
+                    statusService.getCharacteristic(CHAR_GPS_INFO),
+                    statusService.getCharacteristic(CHAR_FH_SURFACE_SPEED),
+                    statusService.getCharacteristic(CHAR_FH_SURFACE_TEMP),
+                    statusService.getCharacteristic(CHAR_FH_PROBE_TEMP),
+                    statusService.getCharacteristic(CHAR_FH_PROBE_DEPTH),
+                    statusService.getCharacteristic(CHAR_FH_SPEED_UNITS),
+                    statusService.getCharacteristic(CHAR_FH_TEMP_UNITS),
+                    statusService.getCharacteristic(CHAR_FH_DEPTH_UNITS),
+                    settingsService.getCharacteristic(CHAR_SERVO_IDLE),
+                    settingsService.getCharacteristic(CHAR_SERVO_MAX),
+                    settingsService.getCharacteristic(CHAR_SERVO_SAFE),
+                    settingsService.getCharacteristic(CHAR_DEFAULT_SPEED),
+                    settingsService.getCharacteristic(CHAR_SMOOTHING),
+                    settingsService.getCharacteristic(CHAR_PID_KP),
+                    settingsService.getCharacteristic(CHAR_PID_KI),
+                    settingsService.getCharacteristic(CHAR_PID_KD),
+                    settingsService.getCharacteristic(CHAR_RATE_LIMIT)
+                ]);
 
-                step = 'getChar(TARGET_SPEED)';
-                charTargetSpeed = await controlService.getCharacteristic(CHAR_TARGET_SPEED);
-                step = 'getChar(SPEED_SOURCE)';
-                charSpeedSource = await controlService.getCharacteristic(CHAR_SPEED_SOURCE);
-                step = 'getChar(ACTION_COMMAND)';
-                charActionCommand = await controlService.getCharacteristic(CHAR_ACTION_COMMAND);
-                step = 'getChar(CURRENT_SPEED)';
-                charCurrentSpeed = await statusService.getCharacteristic(CHAR_CURRENT_SPEED);
-                step = 'getChar(GPS_SPEED)';
-                charGpsSpeed = await statusService.getCharacteristic(CHAR_GPS_SPEED);
-                step = 'getChar(WATER_SPEED)';
-                charWaterSpeed = await statusService.getCharacteristic(CHAR_WATER_SPEED);
-                step = 'getChar(SERVO_POSITION)';
-                charServoPosition = await statusService.getCharacteristic(CHAR_SERVO_POSITION);
-                step = 'getChar(SYSTEM_STATUS)';
-                charSystemStatus = await statusService.getCharacteristic(CHAR_SYSTEM_STATUS);
-                step = 'getChar(GPS_INFO)';
-                charGpsInfo = await statusService.getCharacteristic(CHAR_GPS_INFO);
+                // Assign to module variables
+                charTargetSpeed = _charTargetSpeed;
+                charSpeedSource = _charSpeedSource;
+                charActionCommand = _charActionCommand;
+                charCurrentSpeed = _charCurrentSpeed;
+                charGpsSpeed = _charGpsSpeed;
+                charWaterSpeed = _charWaterSpeed;
+                charServoPosition = _charServoPosition;
+                charSystemStatus = _charSystemStatus;
+                charGpsInfo = _charGpsInfo;
+                charFhSurfaceSpeed = _charFhSurfaceSpeed;
+                charFhSurfaceTemp = _charFhSurfaceTemp;
+                charFhProbeTemp = _charFhProbeTemp;
+                charFhProbeDepth = _charFhProbeDepth;
+                charFhSpeedUnits = _charFhSpeedUnits;
+                charFhTempUnits = _charFhTempUnits;
+                charFhDepthUnits = _charFhDepthUnits;
+                bleSettingsChars.servoIdle = _servoIdle;
+                bleSettingsChars.servoMax = _servoMax;
+                bleSettingsChars.servoSafe = _servoSafe;
+                bleSettingsChars.defaultSpeed = _defaultSpeed;
+                bleSettingsChars.smoothing = _smoothing;
+                bleSettingsChars.pidKp = _pidKp;
+                bleSettingsChars.pidKi = _pidKi;
+                bleSettingsChars.pidKd = _pidKd;
+                bleSettingsChars.rateLimit = _rateLimit;
 
-                step = 'getChar(FH_SURFACE_SPEED)';
-                charFhSurfaceSpeed = await statusService.getCharacteristic(CHAR_FH_SURFACE_SPEED);
-                step = 'getChar(FH_SURFACE_TEMP)';
-                charFhSurfaceTemp = await statusService.getCharacteristic(CHAR_FH_SURFACE_TEMP);
-                step = 'getChar(FH_PROBE_TEMP)';
-                charFhProbeTemp = await statusService.getCharacteristic(CHAR_FH_PROBE_TEMP);
-                step = 'getChar(FH_PROBE_DEPTH)';
-                charFhProbeDepth = await statusService.getCharacteristic(CHAR_FH_PROBE_DEPTH);
-                step = 'getChar(FH_SPEED_UNITS)';
-                charFhSpeedUnits = await statusService.getCharacteristic(CHAR_FH_SPEED_UNITS);
-                step = 'getChar(FH_TEMP_UNITS)';
-                charFhTempUnits = await statusService.getCharacteristic(CHAR_FH_TEMP_UNITS);
-                step = 'getChar(FH_DEPTH_UNITS)';
-                charFhDepthUnits = await statusService.getCharacteristic(CHAR_FH_DEPTH_UNITS);
-
-                step = 'getService(SETTINGS)';
-                const settingsService = await bleServer.getPrimaryService(SERVICE_SETTINGS);
-                step = 'getChar(SERVO_IDLE)';
-                bleSettingsChars.servoIdle = await settingsService.getCharacteristic(CHAR_SERVO_IDLE);
-                step = 'getChar(SERVO_MAX)';
-                bleSettingsChars.servoMax = await settingsService.getCharacteristic(CHAR_SERVO_MAX);
-                step = 'getChar(SERVO_SAFE)';
-                bleSettingsChars.servoSafe = await settingsService.getCharacteristic(CHAR_SERVO_SAFE);
-                step = 'getChar(DEFAULT_SPEED)';
-                bleSettingsChars.defaultSpeed = await settingsService.getCharacteristic(CHAR_DEFAULT_SPEED);
-                step = 'getChar(SMOOTHING)';
-                bleSettingsChars.smoothing = await settingsService.getCharacteristic(CHAR_SMOOTHING);
-                step = 'getChar(PID_KP)';
-                bleSettingsChars.pidKp = await settingsService.getCharacteristic(CHAR_PID_KP);
-                step = 'getChar(PID_KI)';
-                bleSettingsChars.pidKi = await settingsService.getCharacteristic(CHAR_PID_KI);
-                step = 'getChar(PID_KD)';
-                bleSettingsChars.pidKd = await settingsService.getCharacteristic(CHAR_PID_KD);
-                step = 'getChar(RATE_LIMIT)';
-                bleSettingsChars.rateLimit = await settingsService.getCharacteristic(CHAR_RATE_LIMIT);
-
-                // Start notifications
-                step = 'notify(TARGET_SPEED)';
-                await charTargetSpeed.startNotifications();
-                step = 'notify(SPEED_SOURCE)';
-                await charSpeedSource.startNotifications();
-                step = 'notify(CURRENT_SPEED)';
-                await charCurrentSpeed.startNotifications();
-                step = 'notify(GPS_SPEED)';
-                await charGpsSpeed.startNotifications();
-                step = 'notify(WATER_SPEED)';
-                await charWaterSpeed.startNotifications();
-                step = 'notify(SERVO_POSITION)';
-                await charServoPosition.startNotifications();
-                step = 'notify(SYSTEM_STATUS)';
-                await charSystemStatus.startNotifications();
-                step = 'notify(GPS_INFO)';
-                await charGpsInfo.startNotifications();
-                step = 'notify(FH_SURFACE_SPEED)';
-                await charFhSurfaceSpeed.startNotifications();
-                step = 'notify(FH_SURFACE_TEMP)';
-                await charFhSurfaceTemp.startNotifications();
-                step = 'notify(FH_PROBE_TEMP)';
-                await charFhProbeTemp.startNotifications();
-                step = 'notify(FH_PROBE_DEPTH)';
-                await charFhProbeDepth.startNotifications();
-                step = 'notify(FH_SPEED_UNITS)';
-                await charFhSpeedUnits.startNotifications();
-                step = 'notify(FH_TEMP_UNITS)';
-                await charFhTempUnits.startNotifications();
-                step = 'notify(FH_DEPTH_UNITS)';
-                await charFhDepthUnits.startNotifications();
+                // Start all notifications in parallel
+                step = 'startNotifications';
+                await Promise.all([
+                    charTargetSpeed.startNotifications(),
+                    charSpeedSource.startNotifications(),
+                    charCurrentSpeed.startNotifications(),
+                    charGpsSpeed.startNotifications(),
+                    charWaterSpeed.startNotifications(),
+                    charServoPosition.startNotifications(),
+                    charSystemStatus.startNotifications(),
+                    charGpsInfo.startNotifications(),
+                    charFhSurfaceSpeed.startNotifications(),
+                    charFhSurfaceTemp.startNotifications(),
+                    charFhProbeTemp.startNotifications(),
+                    charFhProbeDepth.startNotifications(),
+                    charFhSpeedUnits.startNotifications(),
+                    charFhTempUnits.startNotifications(),
+                    charFhDepthUnits.startNotifications()
+                ]);
 
                 step = 'event listeners';
                 charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
