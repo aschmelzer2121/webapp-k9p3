@@ -790,8 +790,8 @@
 
                 step = 'requestDevice';
                 bleDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [SERVICE_CONTROL] }],
-                    optionalServices: [SERVICE_STATUS, SERVICE_SETTINGS]
+                    filters: [{ name: 'KickerCtrl' }],
+                    optionalServices: [SERVICE_CONTROL, SERVICE_STATUS, SERVICE_SETTINGS]
                 });
 
                 step = 'gatt.connect';
