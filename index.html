@@ -873,25 +873,23 @@
                 bleSettingsChars.pidKd = _pidKd;
                 bleSettingsChars.rateLimit = _rateLimit;
 
-                // Start all notifications in parallel
+                // Start notifications sequentially (some BLE stacks don't handle parallel well)
                 step = 'startNotifications';
-                await Promise.all([
-                    charTargetSpeed.startNotifications(),
-                    charSpeedSource.startNotifications(),
-                    charCurrentSpeed.startNotifications(),
-                    charGpsSpeed.startNotifications(),
-                    charWaterSpeed.startNotifications(),
-                    charServoPosition.startNotifications(),
-                    charSystemStatus.startNotifications(),
-                    charGpsInfo.startNotifications(),
-                    charFhSurfaceSpeed.startNotifications(),
-                    charFhSurfaceTemp.startNotifications(),
-                    charFhProbeTemp.startNotifications(),
-                    charFhProbeDepth.startNotifications(),
-                    charFhSpeedUnits.startNotifications(),
-                    charFhTempUnits.startNotifications(),
-                    charFhDepthUnits.startNotifications()
-                ]);
+                await charTargetSpeed.startNotifications();
+                await charSpeedSource.startNotifications();
+                await charCurrentSpeed.startNotifications();
+                await charGpsSpeed.startNotifications();
+                await charWaterSpeed.startNotifications();
+                await charServoPosition.startNotifications();
+                await charSystemStatus.startNotifications();
+                await charGpsInfo.startNotifications();
+                await charFhSurfaceSpeed.startNotifications();
+                await charFhSurfaceTemp.startNotifications();
+                await charFhProbeTemp.startNotifications();
+                await charFhProbeDepth.startNotifications();
+                await charFhSpeedUnits.startNotifications();
+                await charFhTempUnits.startNotifications();
+                await charFhDepthUnits.startNotifications();
 
                 step = 'event listeners';
                 charCurrentSpeed.addEventListener('characteristicvaluechanged', e => {
